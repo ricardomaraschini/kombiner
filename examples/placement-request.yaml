@@ -1,0 +1,12 @@
+apiVersion: scheduling.io/v1alpha1
+kind: PlacementRequest
+metadata:
+  name: example-placement-request
+spec:
+  schedulerName: teste
+  policy: Lenient
+  priority: 10
+  bindings:
+  - podName: pod-name
+    podUID: pod-uid
+    nodeName: node-name
