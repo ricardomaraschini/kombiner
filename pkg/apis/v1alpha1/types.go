@@ -68,15 +68,20 @@ type PlacementRequestResult string
 type PlacementRequestSpec struct {
 	// Policy indicates the relationship between the bindings in a
 	// placement request.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=Lenient;AllOrNothing
 	Policy PlacementRequestPolicy `json:"policy" protobuf:"bytes,1,opt,name=policy,casttype=PlacementRequestPolicy"`
 
 	// Priority is an arbitrary integer, placement requests with a higher
 	// priority are served first when processing the scheduler queue.
+	// +kubebuilder:validation:Required
 	Priority PlacementRequestPriority `json:"priority" protobuf:"varint,2,opt,name=priority,casttype=PlacementRequestPriority"`
 
 	// SchedulerName is the name of the scheduler that is responsible for
 	// creating this placement request. This is used to identify the
 	// queue that the placement request belongs to.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
 	SchedulerName string `json:"schedulerName,omitempty" protobuf:"bytes,3,opt,name=schedulerName"`
 
 	// Bingings is a list of bindings that the scheduler wants to have
@@ -85,6 +90,8 @@ type PlacementRequestSpec struct {
 	// the node.
 	//
 	// +listType=atomic
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems=1
 	Bindings []Binding `json:"bindings" protobuf:"bytes,4,rep,name=bindings"`
 }
 
@@ -92,9 +99,19 @@ type PlacementRequestSpec struct {
 // the pod name, pod UID and the node name where the pod should be
 // scheduled. The bind is scoped to the PlacementRequest namespace.
 type Binding struct {
-	PodName  string    `json:"podName" protobuf:"bytes,1,opt,name=podName"`
-	PodUID   types.UID `json:"podUID" protobuf:"bytes,2,opt,name=podUID"`
-	NodeName string    `json:"nodeName" protobuf:"bytes,2,opt,name=nodeName"`
+	// PodName is the name of the pod that should be bound to the node.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	PodName string `json:"podName" protobuf:"bytes,1,opt,name=podName"`
+
+	// PodUID is the UID of the pod that should be bound to the node.
+	// +kubebuilder:validation:Required
+	PodUID types.UID `json:"podUID" protobuf:"bytes,2,opt,name=podUID"`
+
+	// NodeName is the name of the node where the pod should be scheduled.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	NodeName string `json:"nodeName" protobuf:"bytes,3,opt,name=nodeName"`
 }
 
 // PlacementRequestStatus holds the status for a PlacementRequest, it contains
