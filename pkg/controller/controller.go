@@ -134,9 +134,8 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		pr.Status.Message = "All bindings failed"
 	}
 
-	// XXX we should have an endpoint for status here.
 	updater := prc.client.SchedulingV1alpha1().PlacementRequests(pr.Namespace)
-	if _, err := updater.Update(ctx, pr, metav1.UpdateOptions{}); err != nil {
+	if _, err := updater.UpdateStatus(ctx, pr, metav1.UpdateOptions{}); err != nil {
 		return fmt.Errorf("failed to update placement request status: %w", err)
 	}
 
