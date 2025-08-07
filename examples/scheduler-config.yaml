@@ -1,0 +1,17 @@
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+clientConnection:
+  kubeconfig: /path/to/.kube/config
+leaderElection:
+  resourceName: placement-request-scheduler
+profiles:
+- schedulerName: placement-request-scheduler
+  plugins:
+    bind:
+      enabled:
+      - name: PlacementRequestBinder
+      disabled:
+      - name: "*"
+  pluginConfig:
+  - name: PlacementRequestBinder
+    args: {}

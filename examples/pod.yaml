@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-using-custom-scheduler
+spec:
+  schedulerName: placement-request-scheduler
+  containers:
+  - name: nginx
+    image: nginx:1.25
