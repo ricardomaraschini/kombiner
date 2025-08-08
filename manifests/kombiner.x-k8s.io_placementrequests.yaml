@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: placementrequests.scheduling.io
+  name: placementrequests.kombiner.x-k8s.io
 spec:
-  group: scheduling.io
+  group: kombiner.x-k8s.io
   names:
     kind: PlacementRequest
     listKind: PlacementRequestList

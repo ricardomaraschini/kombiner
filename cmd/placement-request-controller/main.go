@@ -58,7 +58,7 @@ func main() {
 		ctx,
 		prcli,
 		kubecli.CoreV1(),
-		prInformerFactory.Scheduling().V1alpha1().PlacementRequests(),
+		prInformerFactory.Kombiner().V1alpha1().PlacementRequests(),
 		kubeInformerFactory.Core().V1().Pods().Lister(),
 	)
 	if err != nil {

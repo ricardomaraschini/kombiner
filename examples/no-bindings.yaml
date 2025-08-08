@@ -1,4 +1,4 @@
-apiVersion: scheduling.io/v1alpha1
+apiVersion: kombiner.x-k8s.io/v1alpha1
 kind: PlacementRequest
 metadata:
   name: example-placement-request
