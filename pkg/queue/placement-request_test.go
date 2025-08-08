@@ -16,7 +16,6 @@ func TestPlacementRequestQueue(t *testing.T) {
 	queue := NewPlacementRequestQueue()
 	for i := range 10 {
 		sub := time.Duration(i) * time.Hour * -1
-		metav1.Now().Time.Add(-1 * time.Duration(i) * time.Hour)
 		pr := &v1alpha1.PlacementRequest{
 			ObjectMeta: metav1.ObjectMeta{
 				CreationTimestamp: metav1.Time{
