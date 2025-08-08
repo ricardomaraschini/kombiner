@@ -21,7 +21,7 @@ package versioned
 import (
 	fmt "fmt"
 	http "net/http"
-	schedulingv1alpha1 "placement-request-controller/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
+	kombinerv1alpha1 "placement-request-controller/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
 
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -30,18 +30,18 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	SchedulingV1alpha1() schedulingv1alpha1.SchedulingV1alpha1Interface
+	KombinerV1alpha1() kombinerv1alpha1.KombinerV1alpha1Interface
 }
 
 // Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	schedulingV1alpha1 *schedulingv1alpha1.SchedulingV1alpha1Client
+	kombinerV1alpha1 *kombinerv1alpha1.KombinerV1alpha1Client
 }
 
-// SchedulingV1alpha1 retrieves the SchedulingV1alpha1Client
-func (c *Clientset) SchedulingV1alpha1() schedulingv1alpha1.SchedulingV1alpha1Interface {
-	return c.schedulingV1alpha1
+// KombinerV1alpha1 retrieves the KombinerV1alpha1Client
+func (c *Clientset) KombinerV1alpha1() kombinerv1alpha1.KombinerV1alpha1Interface {
+	return c.kombinerV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -88,7 +88,7 @@ func NewForConfigAndClient(c *rest.Config, httpClient *http.Client) (*Clientset,
 
 	var cs Clientset
 	var err error
-	cs.schedulingV1alpha1, err = schedulingv1alpha1.NewForConfigAndClient(&configShallowCopy, httpClient)
+	cs.kombinerV1alpha1, err = kombinerv1alpha1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.schedulingV1alpha1 = schedulingv1alpha1.New(c)
+	cs.kombinerV1alpha1 = kombinerv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

@@ -28,10 +28,10 @@ import (
 // fakePlacementRequests implements PlacementRequestInterface
 type fakePlacementRequests struct {
 	*gentype.FakeClientWithList[*v1alpha1.PlacementRequest, *v1alpha1.PlacementRequestList]
-	Fake *FakeSchedulingV1alpha1
+	Fake *FakeKombinerV1alpha1
 }
 
-func newFakePlacementRequests(fake *FakeSchedulingV1alpha1, namespace string) apisv1alpha1.PlacementRequestInterface {
+func newFakePlacementRequests(fake *FakeKombinerV1alpha1, namespace string) apisv1alpha1.PlacementRequestInterface {
 	return &fakePlacementRequests{
 		gentype.NewFakeClientWithList[*v1alpha1.PlacementRequest, *v1alpha1.PlacementRequestList](
 			fake.Fake,

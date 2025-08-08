@@ -67,7 +67,7 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		prc.logger.V(3).Info("no bindings found", "obj", prid)
 		pr.Status.Result = v1alpha1.PlacementRequestResultRejected
 		pr.Status.Message = "The request was rejected because it has no bindings"
-		updater := prc.client.SchedulingV1alpha1().PlacementRequests(pr.Namespace)
+		updater := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
 		_, err := updater.Update(ctx, pr, metav1.UpdateOptions{})
 		return err
 	}
@@ -78,7 +78,7 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		prc.logger.V(3).Info("unsupported policy", "policy", pr.Spec.Policy, "obj", prid)
 		pr.Status.Result = v1alpha1.PlacementRequestResultRejected
 		pr.Status.Message = fmt.Sprintf("Unsupported policy: %s", pr.Spec.Policy)
-		updater := prc.client.SchedulingV1alpha1().PlacementRequests(pr.Namespace)
+		updater := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
 		_, err := updater.Update(ctx, pr, metav1.UpdateOptions{})
 		return err
 	}
@@ -134,7 +134,7 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		pr.Status.Message = "All bindings failed"
 	}
 
-	updater := prc.client.SchedulingV1alpha1().PlacementRequests(pr.Namespace)
+	updater := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
 	if _, err := updater.UpdateStatus(ctx, pr, metav1.UpdateOptions{}); err != nil {
 		return fmt.Errorf("failed to update placement request status: %w", err)
 	}

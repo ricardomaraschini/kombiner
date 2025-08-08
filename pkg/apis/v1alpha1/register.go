@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1alpha1 contains API Schema definitions for the kombiner v1alpha1 API group
+// +kubebuilder:object:generate=true
+// +groupName=kombiner.x-k8s.io
 package v1alpha1
 
 import (
@@ -23,7 +26,7 @@ import (
 )
 
 // GroupName is the group name use in this package
-const GroupName = "scheduling.io"
+const GroupName = "kombiner.x-k8s.io"
 
 // SchemeGroupVersion is group version used to register these objects
 var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}

@@ -18,6 +18,6 @@ limitations under the License.
 // +k8s:protobuf-gen=package
 // +k8s:openapi-gen=true
 
-// +groupName=scheduling.io
+// +groupName=kombiner.x-k8s.io
 
 package v1alpha1

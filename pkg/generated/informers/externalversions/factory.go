@@ -254,9 +254,9 @@ type SharedInformerFactory interface {
 	// client.
 	InformerFor(obj runtime.Object, newFunc internalinterfaces.NewInformerFunc) cache.SharedIndexInformer
 
-	Scheduling() apis.Interface
+	Kombiner() apis.Interface
 }
 
-func (f *sharedInformerFactory) Scheduling() apis.Interface {
+func (f *sharedInformerFactory) Kombiner() apis.Interface {
 	return apis.New(f, f.namespace, f.tweakListOptions)
 }

@@ -56,7 +56,7 @@ type placementRequests struct {
 }
 
 // newPlacementRequests returns a PlacementRequests
-func newPlacementRequests(c *SchedulingV1alpha1Client, namespace string) *placementRequests {
+func newPlacementRequests(c *KombinerV1alpha1Client, namespace string) *placementRequests {
 	return &placementRequests{
 		gentype.NewClientWithList[*apisv1alpha1.PlacementRequest, *apisv1alpha1.PlacementRequestList](
 			"placementrequests",

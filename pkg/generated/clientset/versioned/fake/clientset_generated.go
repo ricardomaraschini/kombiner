@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "placement-request-controller/pkg/generated/clientset/versioned"
-	schedulingv1alpha1 "placement-request-controller/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
-	fakeschedulingv1alpha1 "placement-request-controller/pkg/generated/clientset/versioned/typed/apis/v1alpha1/fake"
+	kombinerv1alpha1 "placement-request-controller/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
+	fakekombinerv1alpha1 "placement-request-controller/pkg/generated/clientset/versioned/typed/apis/v1alpha1/fake"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -89,7 +89,7 @@ var (
 	_ testing.FakeClient  = &Clientset{}
 )
 
-// SchedulingV1alpha1 retrieves the SchedulingV1alpha1Client
-func (c *Clientset) SchedulingV1alpha1() schedulingv1alpha1.SchedulingV1alpha1Interface {
-	return &fakeschedulingv1alpha1.FakeSchedulingV1alpha1{Fake: &c.Fake}
+// KombinerV1alpha1 retrieves the KombinerV1alpha1Client
+func (c *Clientset) KombinerV1alpha1() kombinerv1alpha1.KombinerV1alpha1Interface {
+	return &fakekombinerv1alpha1.FakeKombinerV1alpha1{Fake: &c.Fake}
 }
