@@ -56,26 +56,34 @@ spec:
                     scheduled. The bind is scoped to the PlacementRequest namespace.
                   properties:
                     nodeName:
+                      description: NodeName is the name of the node where the pod
+                        should be scheduled.
+                      minLength: 1
                       type: string
                     podName:
+                      description: PodName is the name of the pod that should be bound
+                        to the node.
+                      minLength: 1
                       type: string
                     podUID:
-                      description: |-
-                        UID is a type that holds unique ID values, including UUIDs.  Because we
-                        don't ONLY use UUIDs, this is an alias to string.  Being a type captures
-                        intent and helps make sure that UIDs and names do not get conflated.
+                      description: PodUID is the UID of the pod that should be bound
+                        to the node.
                       type: string
                   required:
                   - nodeName
                   - podName
                   - podUID
                   type: object
+                minItems: 1
                 type: array
                 x-kubernetes-list-type: atomic
               policy:
                 description: |-
                   Policy indicates the relationship between the bindings in a
                   placement request.
+                enum:
+                - Lenient
+                - AllOrNothing
                 type: string
               priority:
                 description: |-
@@ -87,11 +95,13 @@ spec:
                   SchedulerName is the name of the scheduler that is responsible for
                   creating this placement request. This is used to identify the
                   queue that the placement request belongs to.
+                minLength: 1
                 type: string
             required:
             - bindings
             - policy
             - priority
+            - schedulerName
             type: object
           status:
             description: |-
@@ -117,14 +127,18 @@ spec:
                         scheduled. The bind is scoped to the PlacementRequest namespace.
                       properties:
                         nodeName:
+                          description: NodeName is the name of the node where the
+                            pod should be scheduled.
+                          minLength: 1
                           type: string
                         podName:
+                          description: PodName is the name of the pod that should
+                            be bound to the node.
+                          minLength: 1
                           type: string
                         podUID:
-                          description: |-
-                            UID is a type that holds unique ID values, including UUIDs.  Because we
-                            don't ONLY use UUIDs, this is an alias to string.  Being a type captures
-                            intent and helps make sure that UIDs and names do not get conflated.
+                          description: PodUID is the UID of the pod that should be
+                            bound to the node.
                           type: string
                       required:
                       - nodeName
