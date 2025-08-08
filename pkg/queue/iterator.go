@@ -7,7 +7,7 @@ import (
 	"slices"
 	"sync"
 
-	"placement-request-controller/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/v1alpha1"
 )
 
 // QueueConfig defines the configuration for a queue in the queue iterator. It

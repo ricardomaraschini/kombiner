@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"placement-request-controller/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/v1alpha1"
 )
 
 func TestQueueIteratorFairness(t *testing.T) {

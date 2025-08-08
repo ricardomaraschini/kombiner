@@ -20,8 +20,8 @@ package versioned
 
 import (
 	fmt "fmt"
+	kombinerv1alpha1 "kombiner/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
 	http "net/http"
-	kombinerv1alpha1 "placement-request-controller/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
 
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"

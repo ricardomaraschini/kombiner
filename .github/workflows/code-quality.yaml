@@ -32,3 +32,6 @@ jobs:
 
     - name: Run staticcheck
       run: go tool staticcheck ./...
+
+    - name: Build
+      run: make build

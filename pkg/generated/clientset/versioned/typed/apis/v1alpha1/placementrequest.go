@@ -20,8 +20,8 @@ package v1alpha1
 
 import (
 	context "context"
-	apisv1alpha1 "placement-request-controller/pkg/apis/v1alpha1"
-	scheme "placement-request-controller/pkg/generated/clientset/versioned/scheme"
+	apisv1alpha1 "kombiner/pkg/apis/v1alpha1"
+	scheme "kombiner/pkg/generated/clientset/versioned/scheme"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"

@@ -19,9 +19,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	apisv1alpha1 "kombiner/pkg/apis/v1alpha1"
+	scheme "kombiner/pkg/generated/clientset/versioned/scheme"
 	http "net/http"
-	apisv1alpha1 "placement-request-controller/pkg/apis/v1alpha1"
-	scheme "placement-request-controller/pkg/generated/clientset/versioned/scheme"
 
 	rest "k8s.io/client-go/rest"
 )

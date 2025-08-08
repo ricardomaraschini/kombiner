@@ -20,10 +20,10 @@ package v1alpha1
 
 import (
 	context "context"
-	pkgapisv1alpha1 "placement-request-controller/pkg/apis/v1alpha1"
-	versioned "placement-request-controller/pkg/generated/clientset/versioned"
-	internalinterfaces "placement-request-controller/pkg/generated/informers/externalversions/internalinterfaces"
-	apisv1alpha1 "placement-request-controller/pkg/generated/listers/apis/v1alpha1"
+	pkgapisv1alpha1 "kombiner/pkg/apis/v1alpha1"
+	versioned "kombiner/pkg/generated/clientset/versioned"
+	internalinterfaces "kombiner/pkg/generated/informers/externalversions/internalinterfaces"
+	apisv1alpha1 "kombiner/pkg/generated/listers/apis/v1alpha1"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -10,11 +10,11 @@ import (
 	corev1listers "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 
-	"placement-request-controller/pkg/apis/v1alpha1"
-	client "placement-request-controller/pkg/generated/clientset/versioned"
-	informer "placement-request-controller/pkg/generated/informers/externalversions/apis/v1alpha1"
-	lister "placement-request-controller/pkg/generated/listers/apis/v1alpha1"
-	"placement-request-controller/pkg/queue"
+	"kombiner/pkg/apis/v1alpha1"
+	client "kombiner/pkg/generated/clientset/versioned"
+	informer "kombiner/pkg/generated/informers/externalversions/apis/v1alpha1"
+	lister "kombiner/pkg/generated/listers/apis/v1alpha1"
+	"kombiner/pkg/queue"
 )
 
 // PlacementRequestController is a controller for handling PlacementRequests.
