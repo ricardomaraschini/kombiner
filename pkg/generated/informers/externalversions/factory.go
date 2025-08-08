@@ -19,9 +19,9 @@ limitations under the License.
 package externalversions
 
 import (
-	versioned "placement-request-controller/pkg/generated/clientset/versioned"
-	apis "placement-request-controller/pkg/generated/informers/externalversions/apis"
-	internalinterfaces "placement-request-controller/pkg/generated/informers/externalversions/internalinterfaces"
+	versioned "kombiner/pkg/generated/clientset/versioned"
+	apis "kombiner/pkg/generated/informers/externalversions/apis"
+	internalinterfaces "kombiner/pkg/generated/informers/externalversions/internalinterfaces"
 	reflect "reflect"
 	sync "sync"
 	time "time"

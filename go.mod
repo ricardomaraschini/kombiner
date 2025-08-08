@@ -1,4 +1,4 @@
-module placement-request-controller
+module kombiner
 
 go 1.24.5
 

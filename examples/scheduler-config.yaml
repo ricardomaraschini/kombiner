@@ -3,9 +3,9 @@ kind: KubeSchedulerConfiguration
 clientConnection:
   kubeconfig: /path/to/.kube/config
 leaderElection:
-  resourceName: placement-request-scheduler
+  resourceName: kombiner-scheduler
 profiles:
-- schedulerName: placement-request-scheduler
+- schedulerName: kombiner-scheduler
   plugins:
     bind:
       enabled:

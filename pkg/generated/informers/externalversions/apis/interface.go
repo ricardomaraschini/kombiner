@@ -19,8 +19,8 @@ limitations under the License.
 package apis
 
 import (
-	v1alpha1 "placement-request-controller/pkg/generated/informers/externalversions/apis/v1alpha1"
-	internalinterfaces "placement-request-controller/pkg/generated/informers/externalversions/internalinterfaces"
+	v1alpha1 "kombiner/pkg/generated/informers/externalversions/apis/v1alpha1"
+	internalinterfaces "kombiner/pkg/generated/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

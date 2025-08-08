@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	apisv1alpha1 "placement-request-controller/pkg/apis/v1alpha1"
+	apisv1alpha1 "kombiner/pkg/apis/v1alpha1"
 
 	labels "k8s.io/apimachinery/pkg/labels"
 	listers "k8s.io/client-go/listers"

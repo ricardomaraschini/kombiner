@@ -1,17 +1,17 @@
-PROJECT := placement-request-controller
+PROJECT := kombiner
 
 .PHONY: build
 build: build-controller build-scheduler
 
 .PHONY: build-controller
 build-controller:
-	@echo "building placement-request-controller..."
-	CGO_ENABLED=0 go build -o _output/bin/placement-request-controller ./cmd/placement-request-controller
+	@echo "building controller..."
+	CGO_ENABLED=0 go build -o _output/bin/kombiner-controller ./cmd/kombiner-controller
 
 .PHONY: build-scheduler
 build-scheduler:
-	@echo "building placement-request-scheduler..."
-	CGO_ENABLED=0 go build -o _output/bin/placement-request-scheduler ./cmd/placement-request-scheduler
+	@echo "building scheduler..."
+	CGO_ENABLED=0 go build -o _output/bin/kombiner-scheduler ./cmd/kombiner-scheduler
 
 .PHONY: generate
 generate: generate-code generate-crds

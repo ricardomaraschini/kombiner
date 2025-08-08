@@ -12,7 +12,7 @@ spec:
       labels:
         app: my-app
     spec:
-      schedulerName: placement-request-scheduler
+      schedulerName: kombiner-scheduler
       containers:
       - name: my-container
         image: nginx:1.25

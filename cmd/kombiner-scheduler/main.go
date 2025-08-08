@@ -6,7 +6,7 @@ import (
 
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
-	"placement-request-controller/pkg/scheduler"
+	"kombiner/pkg/scheduler"
 )
 
 func main() {

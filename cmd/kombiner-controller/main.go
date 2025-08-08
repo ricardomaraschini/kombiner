@@ -12,9 +12,9 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
 
-	"placement-request-controller/pkg/controller"
-	clientset "placement-request-controller/pkg/generated/clientset/versioned"
-	informers "placement-request-controller/pkg/generated/informers/externalversions"
+	"kombiner/pkg/controller"
+	clientset "kombiner/pkg/generated/clientset/versioned"
+	informers "kombiner/pkg/generated/informers/externalversions"
 )
 
 var (

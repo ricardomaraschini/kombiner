@@ -4,7 +4,7 @@ import (
 	"container/heap"
 	"sync"
 
-	"placement-request-controller/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/v1alpha1"
 )
 
 // PrioritizedPlacementRequest wraps a PlacementRequest and provides a function

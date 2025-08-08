@@ -12,8 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
-	"placement-request-controller/pkg/apis/v1alpha1"
-	"placement-request-controller/pkg/generated/clientset/versioned"
+	"kombiner/pkg/apis/v1alpha1"
+	"kombiner/pkg/generated/clientset/versioned"
 )
 
 // this global variable is used to ensure, at compile time, that the BindPlugin

@@ -22,7 +22,7 @@ SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
 source "${SCRIPT_ROOT}/hack/kube_codegen.sh"
 
-THIS_PKG="placement-request-controller"
+THIS_PKG="kombiner"
 
 kube::codegen::gen_helpers \
     --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
