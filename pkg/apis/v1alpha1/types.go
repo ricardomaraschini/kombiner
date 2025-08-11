@@ -45,6 +45,10 @@ const (
 	// was not processed successfully.
 	PlacementRequestResultFailure PlacementRequestResult = "Failure"
 
+	// PlacementRequestResultPartialSuccess indicates that the placement
+	// request was processed but not all bindings were successful.
+	PlacementRequestResultPartialSuccess PlacementRequestResult = "PartialSuccess"
+
 	// PlacementRequestResultRejected indicates that the placement request
 	// was rejected, this means that the request was not processed and may
 	// be invalid or not applicable.
