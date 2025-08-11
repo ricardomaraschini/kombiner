@@ -145,9 +145,9 @@ type PlacementRequestStatus struct {
 // PlacementRequestBindingResult holds the result of a single binding
 // inside a PlacementRequest object.
 type PlacementRequestBindingResult struct {
-	Binding Binding                `json:"binding" protobuf:"bytes,1,opt,name=binding"`
-	Result  PlacementRequestResult `json:"result" protobuf:"bytes,2,opt,name=result,casttype=PlacementRequestResult"`
-	Reason  string                 `json:"reason,omitempty" protobuf:"bytes,3,opt,name=reason"`
+	Binding Binding                `json:"binding"           protobuf:"bytes,1,opt,name=binding"`
+	Result  PlacementRequestResult `json:"result"            protobuf:"bytes,2,opt,name=result,casttype=PlacementRequestResult"`
+	Reason  string                 `json:"reason,omitempty"  protobuf:"bytes,3,opt,name=reason"`
 	Message string                 `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
 }
 
