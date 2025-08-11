@@ -20,8 +20,8 @@ package externalversions
 
 import (
 	versioned "kombiner/pkg/generated/clientset/versioned"
-	apis "kombiner/pkg/generated/informers/externalversions/apis"
 	internalinterfaces "kombiner/pkg/generated/informers/externalversions/internalinterfaces"
+	kombiner "kombiner/pkg/generated/informers/externalversions/kombiner"
 	reflect "reflect"
 	sync "sync"
 	time "time"
@@ -254,9 +254,9 @@ type SharedInformerFactory interface {
 	// client.
 	InformerFor(obj runtime.Object, newFunc internalinterfaces.NewInformerFunc) cache.SharedIndexInformer
 
-	Kombiner() apis.Interface
+	Kombiner() kombiner.Interface
 }
 
-func (f *sharedInformerFactory) Kombiner() apis.Interface {
-	return apis.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Kombiner() kombiner.Interface {
+	return kombiner.New(f, f.namespace, f.tweakListOptions)
 }

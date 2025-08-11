@@ -10,10 +10,10 @@ import (
 	corev1listers "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 
-	"kombiner/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/kombiner/v1alpha1"
 	client "kombiner/pkg/generated/clientset/versioned"
-	informer "kombiner/pkg/generated/informers/externalversions/apis/v1alpha1"
-	lister "kombiner/pkg/generated/listers/apis/v1alpha1"
+	informer "kombiner/pkg/generated/informers/externalversions/kombiner/v1alpha1"
+	lister "kombiner/pkg/generated/listers/kombiner/v1alpha1"
 	helpers "kombiner/pkg/placementrequests/v1alpha1"
 	"kombiner/pkg/queue"
 )

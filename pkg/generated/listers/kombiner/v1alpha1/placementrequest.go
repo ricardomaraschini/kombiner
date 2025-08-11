@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	apisv1alpha1 "kombiner/pkg/apis/v1alpha1"
+	kombinerv1alpha1 "kombiner/pkg/apis/kombiner/v1alpha1"
 
 	labels "k8s.io/apimachinery/pkg/labels"
 	listers "k8s.io/client-go/listers"
@@ -31,7 +31,7 @@ import (
 type PlacementRequestLister interface {
 	// List lists all PlacementRequests in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*apisv1alpha1.PlacementRequest, err error)
+	List(selector labels.Selector) (ret []*kombinerv1alpha1.PlacementRequest, err error)
 	// PlacementRequests returns an object that can list and get PlacementRequests.
 	PlacementRequests(namespace string) PlacementRequestNamespaceLister
 	PlacementRequestListerExpansion
@@ -39,17 +39,17 @@ type PlacementRequestLister interface {
 
 // placementRequestLister implements the PlacementRequestLister interface.
 type placementRequestLister struct {
-	listers.ResourceIndexer[*apisv1alpha1.PlacementRequest]
+	listers.ResourceIndexer[*kombinerv1alpha1.PlacementRequest]
 }
 
 // NewPlacementRequestLister returns a new PlacementRequestLister.
 func NewPlacementRequestLister(indexer cache.Indexer) PlacementRequestLister {
-	return &placementRequestLister{listers.New[*apisv1alpha1.PlacementRequest](indexer, apisv1alpha1.Resource("placementrequest"))}
+	return &placementRequestLister{listers.New[*kombinerv1alpha1.PlacementRequest](indexer, kombinerv1alpha1.Resource("placementrequest"))}
 }
 
 // PlacementRequests returns an object that can list and get PlacementRequests.
 func (s *placementRequestLister) PlacementRequests(namespace string) PlacementRequestNamespaceLister {
-	return placementRequestNamespaceLister{listers.NewNamespaced[*apisv1alpha1.PlacementRequest](s.ResourceIndexer, namespace)}
+	return placementRequestNamespaceLister{listers.NewNamespaced[*kombinerv1alpha1.PlacementRequest](s.ResourceIndexer, namespace)}
 }
 
 // PlacementRequestNamespaceLister helps list and get PlacementRequests.
@@ -57,15 +57,15 @@ func (s *placementRequestLister) PlacementRequests(namespace string) PlacementRe
 type PlacementRequestNamespaceLister interface {
 	// List lists all PlacementRequests in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*apisv1alpha1.PlacementRequest, err error)
+	List(selector labels.Selector) (ret []*kombinerv1alpha1.PlacementRequest, err error)
 	// Get retrieves the PlacementRequest from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*apisv1alpha1.PlacementRequest, error)
+	Get(name string) (*kombinerv1alpha1.PlacementRequest, error)
 	PlacementRequestNamespaceListerExpansion
 }
 
 // placementRequestNamespaceLister implements the PlacementRequestNamespaceLister
 // interface.
 type placementRequestNamespaceLister struct {
-	listers.ResourceIndexer[*apisv1alpha1.PlacementRequest]
+	listers.ResourceIndexer[*kombinerv1alpha1.PlacementRequest]
 }

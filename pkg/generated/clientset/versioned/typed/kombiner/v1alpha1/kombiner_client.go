@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	apisv1alpha1 "kombiner/pkg/apis/v1alpha1"
+	kombinerv1alpha1 "kombiner/pkg/apis/kombiner/v1alpha1"
 	scheme "kombiner/pkg/generated/clientset/versioned/scheme"
 	http "net/http"
 
@@ -81,7 +81,7 @@ func New(c rest.Interface) *KombinerV1alpha1Client {
 }
 
 func setConfigDefaults(config *rest.Config) {
-	gv := apisv1alpha1.SchemeGroupVersion
+	gv := kombinerv1alpha1.SchemeGroupVersion
 	config.GroupVersion = &gv
 	config.APIPath = "/apis"
 	config.NegotiatedSerializer = rest.CodecFactoryForGeneratedClient(scheme.Scheme, scheme.Codecs).WithoutConversion()

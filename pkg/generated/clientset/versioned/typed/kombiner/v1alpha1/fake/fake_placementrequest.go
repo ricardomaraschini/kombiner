@@ -19,8 +19,8 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "kombiner/pkg/apis/v1alpha1"
-	apisv1alpha1 "kombiner/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
+	v1alpha1 "kombiner/pkg/apis/kombiner/v1alpha1"
+	kombinerv1alpha1 "kombiner/pkg/generated/clientset/versioned/typed/kombiner/v1alpha1"
 
 	gentype "k8s.io/client-go/gentype"
 )
@@ -31,7 +31,7 @@ type fakePlacementRequests struct {
 	Fake *FakeKombinerV1alpha1
 }
 
-func newFakePlacementRequests(fake *FakeKombinerV1alpha1, namespace string) apisv1alpha1.PlacementRequestInterface {
+func newFakePlacementRequests(fake *FakeKombinerV1alpha1, namespace string) kombinerv1alpha1.PlacementRequestInterface {
 	return &fakePlacementRequests{
 		gentype.NewFakeClientWithList[*v1alpha1.PlacementRequest, *v1alpha1.PlacementRequestList](
 			fake.Fake,

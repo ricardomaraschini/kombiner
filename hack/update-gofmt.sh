@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Copyright 2017 The Kubernetes Authors.
 #
@@ -14,23 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 set -o errexit
 set -o nounset
 set -o pipefail
 
-SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+DESCHEDULER_ROOT=$(dirname "${BASH_SOURCE}")/..
+source "${DESCHEDULER_ROOT}/hack/lib/go.sh"
 
-source "${SCRIPT_ROOT}/hack/kube_codegen.sh"
+go::verify_version
 
-THIS_PKG="kombiner"
+cd "${DESCHEDULER_ROOT}"
 
-kube::codegen::gen_helpers \
-    --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
-    "${SCRIPT_ROOT}/pkg/apis/kombiner/v1alpha1"
+find_files() {
+  find . -not \( \
+      \( \
+        -wholename './output' \
+        -o -wholename './_output' \
+        -o -wholename './release' \
+        -o -wholename './target' \
+        -o -wholename './.git' \
+        -o -wholename '*/third_party/*' \
+        -o -wholename '*/Godeps/*' \
+        -o -wholename '*/vendor/*' \
+      \) -prune \
+    \) -name '*.go'
+}
 
-kube::codegen::gen_client \
-    --with-watch \
-    --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
-    --output-dir "${SCRIPT_ROOT}/pkg/generated" \
-    --output-pkg "${THIS_PKG}/pkg/generated" \
-    "${SCRIPT_ROOT}/pkg/apis"
+GOFMT="gofmt -s -w"
+find_files | xargs $GOFMT -l

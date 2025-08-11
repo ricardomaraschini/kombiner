@@ -20,10 +20,10 @@ package v1alpha1
 
 import (
 	context "context"
-	pkgapisv1alpha1 "kombiner/pkg/apis/v1alpha1"
+	apiskombinerv1alpha1 "kombiner/pkg/apis/kombiner/v1alpha1"
 	versioned "kombiner/pkg/generated/clientset/versioned"
 	internalinterfaces "kombiner/pkg/generated/informers/externalversions/internalinterfaces"
-	apisv1alpha1 "kombiner/pkg/generated/listers/apis/v1alpha1"
+	kombinerv1alpha1 "kombiner/pkg/generated/listers/kombiner/v1alpha1"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,7 +36,7 @@ import (
 // PlacementRequests.
 type PlacementRequestInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() apisv1alpha1.PlacementRequestLister
+	Lister() kombinerv1alpha1.PlacementRequestLister
 }
 
 type placementRequestInformer struct {
@@ -83,7 +83,7 @@ func NewFilteredPlacementRequestInformer(client versioned.Interface, namespace s
 				return client.KombinerV1alpha1().PlacementRequests(namespace).Watch(ctx, options)
 			},
 		},
-		&pkgapisv1alpha1.PlacementRequest{},
+		&apiskombinerv1alpha1.PlacementRequest{},
 		resyncPeriod,
 		indexers,
 	)
@@ -94,9 +94,9 @@ func (f *placementRequestInformer) defaultInformer(client versioned.Interface, r
 }
 
 func (f *placementRequestInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&pkgapisv1alpha1.PlacementRequest{}, f.defaultInformer)
+	return f.factory.InformerFor(&apiskombinerv1alpha1.PlacementRequest{}, f.defaultInformer)
 }
 
-func (f *placementRequestInformer) Lister() apisv1alpha1.PlacementRequestLister {
-	return apisv1alpha1.NewPlacementRequestLister(f.Informer().GetIndexer())
+func (f *placementRequestInformer) Lister() kombinerv1alpha1.PlacementRequestLister {
+	return kombinerv1alpha1.NewPlacementRequestLister(f.Informer().GetIndexer())
 }

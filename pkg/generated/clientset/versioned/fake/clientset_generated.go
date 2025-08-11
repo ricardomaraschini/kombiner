@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "kombiner/pkg/generated/clientset/versioned"
-	kombinerv1alpha1 "kombiner/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
-	fakekombinerv1alpha1 "kombiner/pkg/generated/clientset/versioned/typed/apis/v1alpha1/fake"
+	kombinerv1alpha1 "kombiner/pkg/generated/clientset/versioned/typed/kombiner/v1alpha1"
+	fakekombinerv1alpha1 "kombiner/pkg/generated/clientset/versioned/typed/kombiner/v1alpha1/fake"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
