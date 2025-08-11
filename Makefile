@@ -19,7 +19,7 @@ generate: generate-code generate-crds
 .PHONY: generate-crds
 generate-crds:
 	@echo "generating crds..."
-	go tool controller-gen crd paths=./pkg/apis/v1alpha1 output:crd:dir=./manifests
+	go tool controller-gen crd paths=./pkg/apis/kombiner/v1alpha1 output:crd:dir=./manifests
 
 .PHONY: generate-code
 generate-code:

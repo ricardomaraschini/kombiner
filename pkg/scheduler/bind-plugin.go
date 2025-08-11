@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
-	"kombiner/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/kombiner/v1alpha1"
 	"kombiner/pkg/generated/clientset/versioned"
 )
 

@@ -139,5 +139,7 @@ require (
 tool (
 	github.com/segmentio/golines
 	honnef.co/go/tools/cmd/staticcheck
+	k8s.io/code-generator
+	k8s.io/code-generator/cmd/validation-gen
 	sigs.k8s.io/controller-tools/cmd/controller-gen
 )

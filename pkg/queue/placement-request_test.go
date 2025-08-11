@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"kombiner/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/kombiner/v1alpha1"
 )
 
 func TestPlacementRequestQueue(t *testing.T) {

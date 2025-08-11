@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"kombiner/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/kombiner/v1alpha1"
 )
 
 // Validate makes some basic validation checks on the PlacementRequest. This

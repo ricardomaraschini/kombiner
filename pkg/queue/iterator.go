@@ -7,7 +7,7 @@ import (
 	"slices"
 	"sync"
 
-	"kombiner/pkg/apis/v1alpha1"
+	"kombiner/pkg/apis/kombiner/v1alpha1"
 )
 
 // QueueConfig defines the configuration for a queue in the queue iterator. It
