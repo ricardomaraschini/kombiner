@@ -41,6 +41,14 @@ func (p *BindPlugin) Bind(
 ) *framework.Status {
 	// we will use the pod uid as the placement request name.
 	prname := string(pod.UID)
+	if prname == "" {
+		return framework.AsStatus(fmt.Errorf("pod %v/%v is missing its UID", pod.Namespace, pod.Name))
+	}
+
+	schedulerName := pod.Spec.SchedulerName
+	if schedulerName == "" {
+		schedulerName = corev1.DefaultSchedulerName
+	}
 
 	pr := &v1alpha1.PlacementRequest{
 		ObjectMeta: metav1.ObjectMeta{
@@ -58,7 +66,7 @@ func (p *BindPlugin) Bind(
 		Spec: v1alpha1.PlacementRequestSpec{
 			Policy:        v1alpha1.PlacementRequestPolicyLenient,
 			Priority:      0,
-			SchedulerName: SchedulerName,
+			SchedulerName: schedulerName,
 			Bindings: []v1alpha1.Binding{
 				{
 					PodName:  pod.Name,
