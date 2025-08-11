@@ -16,6 +16,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Conventional commit
+      uses: ytanikin/pr-conventional-commits@1.4.2
+      with:
+        task_types: '["ci","feat","fix","docs","test","chore","revert"]'
+        add_label: false
+
     - name: Setup go
       uses: actions/setup-go@v5
       with:
