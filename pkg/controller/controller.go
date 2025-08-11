@@ -14,6 +14,7 @@ import (
 	client "kombiner/pkg/generated/clientset/versioned"
 	informer "kombiner/pkg/generated/informers/externalversions/apis/v1alpha1"
 	lister "kombiner/pkg/generated/listers/apis/v1alpha1"
+	helpers "kombiner/pkg/placementrequests/v1alpha1"
 	"kombiner/pkg/queue"
 )
 
@@ -61,31 +62,38 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		return nil
 	}
 
-	// if there is no binding present then we cannot process the
-	// PlacementRequest. XXX this should be handled at the api level.
-	if len(pr.Spec.Bindings) == 0 {
-		prc.logger.V(3).Info("no bindings found", "obj", prid)
-		pr.Status.Result = v1alpha1.PlacementRequestResultRejected
-		pr.Status.Message = "The request was rejected because it has no bindings"
-		updater := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
-		_, err := updater.Update(ctx, pr, metav1.UpdateOptions{})
-		return err
-	}
+	// here we create a few shortcuts to api access entities we are going
+	// to use during this function. these shortcuts are already namespace
+	// scoped.
+	prqclient := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
+	podlister := prc.podlister.Pods(pr.Namespace)
 
-	// we only operate on Lenient policy. for the all or nothing policy a
-	// change in the api server will be necessary.
-	if pr.Spec.Policy != v1alpha1.PlacementRequestPolicyLenient {
-		prc.logger.V(3).Info("unsupported policy", "policy", pr.Spec.Policy, "obj", prid)
+	if err := helpers.Validate(pr); err != nil {
+		prc.logger.Error(err, "placement request is not valid", "obj", prid)
 		pr.Status.Result = v1alpha1.PlacementRequestResultRejected
-		pr.Status.Message = fmt.Sprintf("Unsupported policy: %s", pr.Spec.Policy)
-		updater := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
-		_, err := updater.Update(ctx, pr, metav1.UpdateOptions{})
+		pr.Status.Message = err.Error()
+		_, err := prqclient.UpdateStatus(ctx, pr, metav1.UpdateOptions{})
 		return err
 	}
 
 	var success bool
 	for _, binding := range pr.Spec.Bindings {
 		prc.logger.V(3).Info("binding pod to node", "bind", binding, "obj", prid)
+
+		if pod, err := podlister.Get(binding.PodName); err != nil {
+			prc.logger.Error(err, "failed to get pod")
+			message := fmt.Sprintf("Failed to get pod %s: %v", binding.PodName, err)
+			helpers.SetPodBindingFailure(pr, binding, "API error", message)
+			continue
+		} else if pod.Spec.NodeName != "" {
+			if pod.Spec.NodeName == binding.NodeName {
+				helpers.SetPodBindingSuccess(pr, binding, "Binding unneeded", "Pod was already bound")
+				continue
+			}
+			message := fmt.Sprintf("Pod %s bound to a different node node", binding.PodName)
+			helpers.SetPodBindingFailure(pr, binding, "Pod already bound", message)
+			continue
+		}
 
 		bind := &v1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
@@ -102,29 +110,13 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		binder := prc.coreclient.Pods(pr.Namespace)
 		if err := binder.Bind(ctx, bind, metav1.CreateOptions{}); err != nil {
 			prc.logger.Error(err, "failed to bind pod to node", "bind", binding, "obj", prid)
-			pr.Status.Bindings = append(
-				pr.Status.Bindings,
-				v1alpha1.PlacementRequestBindingResult{
-					Binding: binding,
-					Result:  v1alpha1.PlacementRequestResultFailure,
-					Reason:  "API denied binding",
-					Message: err.Error(),
-				},
-			)
+			helpers.SetPodBindingFailure(pr, binding, "API denied binding", err.Error())
 			continue
 		}
 
 		success = true
 		prc.logger.V(3).Info("pod successfully bound to node", "bind", binding, "obj", prid)
-		pr.Status.Bindings = append(
-			pr.Status.Bindings,
-			v1alpha1.PlacementRequestBindingResult{
-				Binding: binding,
-				Result:  v1alpha1.PlacementRequestResultSuccess,
-				Reason:  "Binding successful",
-				Message: "The pod was successfully bound to the node",
-			},
-		)
+		helpers.SetPodBindingSuccess(pr, binding, "Binding successful", "Pod successfully bound")
 	}
 
 	pr.Status.Result = v1alpha1.PlacementRequestResultSuccess
@@ -134,8 +126,7 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		pr.Status.Message = "All bindings failed"
 	}
 
-	updater := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
-	if _, err := updater.UpdateStatus(ctx, pr, metav1.UpdateOptions{}); err != nil {
+	if _, err := prqclient.UpdateStatus(ctx, pr, metav1.UpdateOptions{}); err != nil {
 		return fmt.Errorf("failed to update placement request status: %w", err)
 	}
 
