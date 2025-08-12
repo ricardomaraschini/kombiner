@@ -40,7 +40,7 @@ jobs:
       run: go tool staticcheck ./...
 
     - name: Validate format
-      run: go tool golines -w -m 120 --ignored-dirs generated . && git diff --exit-code
+      run: make format && git diff --exit-code
 
     - name: Build
       run: make build
