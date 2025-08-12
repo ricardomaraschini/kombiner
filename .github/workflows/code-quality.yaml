@@ -18,6 +18,7 @@ jobs:
 
     - name: Conventional commit
       uses: ytanikin/pr-conventional-commits@1.4.2
+      if: github.ref != 'refs/heads/main'
       with:
         task_types: '["ci","feat","fix","docs","test","chore","revert"]'
         add_label: false
