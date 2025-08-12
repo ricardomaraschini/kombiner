@@ -26,6 +26,10 @@ generate-code:
 	@echo "updating codegen..."
 	./hack/update-codegen.sh
 
+.PHONY: test-unit
+test-unit:
+	./hack/run-unit-tests.sh
+
 .PHONY: clean
 clean:
 	rm -rf _output
