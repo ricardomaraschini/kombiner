@@ -29,3 +29,7 @@ generate-code:
 .PHONY: clean
 clean:
 	rm -rf _output
+
+.PHONY: format
+format:
+	./hack/update-gofmt.sh
