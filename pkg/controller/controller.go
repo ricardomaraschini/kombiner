@@ -76,7 +76,6 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		return err
 	}
 
-	var success bool
 	for _, binding := range pr.Spec.Bindings {
 		prc.logger.V(3).Info("binding pod to node", "bind", binding, "obj", prid)
 
@@ -114,18 +113,11 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 			continue
 		}
 
-		success = true
 		prc.logger.V(3).Info("pod successfully bound to node", "bind", binding, "obj", prid)
 		helpers.SetPodBindingSuccess(pr, binding, "Binding successful", "Pod successfully bound")
 	}
 
-	pr.Status.Result = v1alpha1.PlacementRequestResultSuccess
-	pr.Status.Message = "The request was successfully scheduled"
-	if !success {
-		pr.Status.Result = v1alpha1.PlacementRequestResultFailure
-		pr.Status.Message = "All bindings failed"
-	}
-
+	pr.Status.Result, pr.Status.Message = helpers.AssessResult(pr)
 	if _, err := prqclient.UpdateStatus(ctx, pr, metav1.UpdateOptions{}); err != nil {
 		return fmt.Errorf("failed to update placement request status: %w", err)
 	}

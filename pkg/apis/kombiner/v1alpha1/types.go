@@ -41,6 +41,13 @@ const (
 	// request were processed successfully.
 	PlacementRequestResultSuccess PlacementRequestResult = "Success"
 
+	// PlacementRequestResultPartialSuccess indicates that the placement
+	// request was processed successfully, but not all bindings were
+	// fulfilled. This only applies to the Lenien policy and it means
+	// a success. A partial bind on a AllOrNothing policy is considered
+	// a failure.
+	PlacementRequestResultPartialSuccess PlacementRequestResult = "PartialSuccess"
+
 	// PlacementRequestResultFailure indicates that the placement request
 	// was not processed successfully.
 	PlacementRequestResultFailure PlacementRequestResult = "Failure"
