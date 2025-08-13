@@ -26,7 +26,7 @@ THIS_PKG="kombiner"
 
 kube::codegen::gen_helpers \
     --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
-    "${SCRIPT_ROOT}/pkg/apis/kombiner/v1alpha1"
+    "${SCRIPT_ROOT}/pkg/apis"
 
 kube::codegen::gen_client \
     --with-watch \

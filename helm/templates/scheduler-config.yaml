@@ -20,4 +20,5 @@ data:
           - name: "*"
       pluginConfig:
       - name: PlacementRequestBinder
-        args: {}
+        args:
+          timeout: 5s

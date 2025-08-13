@@ -10,11 +10,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 
 	"kombiner/pkg/apis/kombiner/v1alpha1"
+	"kombiner/pkg/apis/scheduler"
 	"kombiner/pkg/generated/clientset/versioned"
 )
+
+// DeletePlacementRequestTimeout is the amount of time we wait for deleting a
+// placement request we do not care about anymore. This should be enough but
+// if it isn't the system is designed to delete them before creating a new
+// one for the same pod.
+const DeletePlacementRequestTimeout = time.Second
 
 // this global variable is used to ensure, at compile time, that the BindPlugin
 // struct complies with the expected framework interface.
@@ -24,7 +32,9 @@ var _ framework.BindPlugin = &BindPlugin{}
 // nodes. Its purpose is to generate PlacementRequest for pods and wait until
 // they are done.
 type BindPlugin struct {
+	logger klog.Logger
 	client versioned.Interface
+	config *scheduler.PlacementRequestBinderArgs
 }
 
 // Name purpose is to return the plugin name so the scheduler framework can
@@ -93,10 +103,15 @@ func (p *BindPlugin) Bind(
 		return framework.AsStatus(err)
 	}
 
+	// this timeout here is used to limit the amount of time we will spend
+	// waiting for the placement request to be resolved.
+	timeout, cancel := context.WithTimeout(ctx, p.config.Timeout.Duration)
+	defer cancel()
+
 	// XXX we are simply polling here but this is wrong in so many levels.
 	// the amount of things to be improved here is huge.
 	if err := wait.PollUntilContextCancel(
-		ctx, time.Second, true,
+		timeout, time.Second, true,
 		func(ctx context.Context) (bool, error) {
 			var err error
 			pr, err = client.Get(ctx, prname, metav1.GetOptions{})
@@ -112,6 +127,17 @@ func (p *BindPlugin) Bind(
 			return true, nil
 		},
 	); err != nil {
+		// we don't know what has caused the failure, it may be that
+		// the original context was cancelled so we can't use it.
+		delctx, delcancel := context.WithTimeout(
+			context.Background(), DeletePlacementRequestTimeout,
+		)
+		defer delcancel()
+
+		err = client.Delete(delctx, prname, metav1.DeleteOptions{})
+		if err != nil {
+			p.logger.Error(err, "failed to delete placement request")
+		}
 		return framework.AsStatus(err)
 	}
 
@@ -129,23 +155,36 @@ func (p *BindPlugin) Bind(
 // NewBindPlugin creates a new BindPlugin instance. This function is used when
 // using this plugin as an extension for the kubernetes scheduler.
 func NewBindPlugin(
-	ctx context.Context, _ runtime.Object, handle framework.Handle,
+	ctx context.Context, oargs runtime.Object, handle framework.Handle,
 ) (framework.Plugin, error) {
-	config := handle.KubeConfig()
+	kconfig := handle.KubeConfig()
+
+	args, ok := oargs.(*scheduler.PlacementRequestBinderArgs)
+	if !ok {
+		return nil, fmt.Errorf("invalid %T type", oargs)
+	}
+
+	// make sure we are using sane default values.
+	scheduler.SetDefaults(args)
 
 	// XXX here be dragons. it seems like the kubeconfig returned by the
 	// framework handle prefers to use protobuf and this is not supported
 	// by the current implementation of the placement request types. this
 	// "patch" here may affect other plugins using the same kubeconfig but
 	// this remains to be seen.
-	config.ContentType = "application/json"
+	kconfig.ContentType = "application/json"
 
-	client, err := versioned.NewForConfig(config)
+	client, err := versioned.NewForConfig(kconfig)
 	if err != nil {
 		return nil, fmt.Errorf("error building placement request clientset: %w", err)
 	}
 
+	// extract the logger from the context and keep it around.
+	logger := klog.FromContext(ctx).WithValues("plugin", PluginName)
+
 	return &BindPlugin{
 		client: client,
+		config: args,
+		logger: logger,
 	}, nil
 }

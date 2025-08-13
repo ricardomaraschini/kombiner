@@ -13,11 +13,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/ktesting"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 	st "k8s.io/kubernetes/pkg/scheduler/testing"
 
 	"kombiner/pkg/apis/kombiner/v1alpha1"
+	"kombiner/pkg/apis/scheduler"
 	"kombiner/pkg/generated/clientset/versioned/fake"
 )
 
@@ -61,11 +63,18 @@ func TestBindPluginSchedulerNameSet(t *testing.T) {
 			testPod.UID = tt.podUID
 			testPod.Spec.SchedulerName = tt.schedulerName
 
+			config := &scheduler.PlacementRequestBinderArgs{}
+			scheduler.SetDefaults(config)
+
 			var bindStatus *framework.Status
 			bindDoneChan := make(chan struct{})
 			// run the binding step in parallel so the created PR can be inspected and updated
 			go func() {
-				binder := &BindPlugin{client: client}
+				binder := &BindPlugin{
+					client: client,
+					logger: klog.New(nil),
+					config: config,
+				}
 				bindStatus = binder.Bind(ctx, nil, testPod, "testNode")
 				bindDoneChan <- struct{}{}
 			}()
