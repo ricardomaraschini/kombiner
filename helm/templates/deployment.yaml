@@ -1,0 +1,40 @@
+# this should never be used in production and is intended for testing.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kombiner-daemons
+  labels:
+    app: kombiner-daemons
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kombiner-daemons
+  template:
+    metadata:
+      labels:
+        app: kombiner-daemons
+    spec:
+      serviceAccountName: kombiner
+      volumes:
+      - name: scheduler-config
+        configMap:
+          name: scheduler-config
+      containers:
+      - name: scheduler
+        image: {{ .Values.image.image_name }}:{{ .Values.image.tag }}
+        imagePullPolicy: IfNotPresent
+        command:
+        - /usr/local/bin/kombiner-scheduler
+        args:
+        - --config=/etc/scheduler/config.yaml
+        volumeMounts:
+        - name: scheduler-config
+          mountPath: /etc/scheduler/config.yaml
+          subPath: config.yaml
+      - name: controller
+        image: {{ .Values.image.image_name }}:{{ .Values.image.tag }}
+        imagePullPolicy: IfNotPresent
+        command:
+        - /usr/local/bin/kombiner-controller

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: kombiner
+description: A Helm chart for deploying Kombiner Daemons
+version: 0.1.0
+appVersion: 0.1.0
