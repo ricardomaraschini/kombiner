@@ -64,3 +64,31 @@ func SetPodBindingResult(
 		},
 	)
 }
+
+// AssessResult role is to assess, based on the placement request status, if
+// it was successful or not. This function returns the result and a human
+// readable message.
+func AssessResult(pr *v1alpha1.PlacementRequest) (v1alpha1.PlacementRequestResult, string) {
+	if len(pr.Status.Bindings) == 0 {
+		return v1alpha1.PlacementRequestResultRejected, "No bindings"
+	}
+
+	successes := 0
+	for _, b := range pr.Status.Bindings {
+		if b.Result == v1alpha1.PlacementRequestResultSuccess {
+			successes++
+		}
+	}
+
+	switch {
+	case successes == 0:
+		return v1alpha1.PlacementRequestResultFailure, "All bindings failed"
+	case successes == len(pr.Status.Bindings):
+		return v1alpha1.PlacementRequestResultSuccess, "All bindings succeeded"
+	default:
+		msg := fmt.Sprintf(
+			"%d of %d bindings succeeded", successes, len(pr.Status.Bindings),
+		)
+		return v1alpha1.PlacementRequestResultPartialSuccess, msg
+	}
+}
