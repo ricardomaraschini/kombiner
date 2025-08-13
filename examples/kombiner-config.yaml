@@ -1,0 +1,11 @@
+apiVersion: config.kombiner.x-k8s.io/v1alpha1
+kind: Configuration
+queues:
+- schedulerName: default-scheduler
+  weight: 50
+  maxSize: 1 # 1 no batch scheduling, -1 unlimited, N limited
+  plugins: # enabling per scheduler
+    validate:
+      enabled:
+      - TaintToleration
+      - PodTopologySpread

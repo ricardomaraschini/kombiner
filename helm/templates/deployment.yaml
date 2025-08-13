@@ -16,11 +16,17 @@ spec:
       labels:
         app: kombiner-daemons
     spec:
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
       serviceAccountName: kombiner
       volumes:
       - name: scheduler-config
         configMap:
           name: scheduler-config
+      - name: controller-config
+        configMap:
+          name: controller-config
       containers:
       - name: scheduler
         image: {{ .Values.image.image_name }}:{{ .Values.image.tag }}
@@ -38,3 +44,10 @@ spec:
         imagePullPolicy: IfNotPresent
         command:
         - /usr/local/bin/kombiner-controller
+        args:
+        - --config=/etc/controller/config.yaml
+        - -v=3
+        volumeMounts:
+        - name: controller-config
+          mountPath: /etc/controller/config.yaml
+          subPath: config.yaml
