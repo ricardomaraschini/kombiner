@@ -3,5 +3,6 @@ package main
 import "flag"
 
 func init() {
-	flag.StringVar(&KubeConfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&configFile, "config", "",
+		"The controller will load its initial configuration from this file. ")
 }

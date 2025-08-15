@@ -37,6 +37,12 @@ var _ = ginkgo.Describe("create a single pod", func() {
 			pod := &corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{Name: testPod},
 				Spec: corev1.PodSpec{
+					Tolerations: []corev1.Toleration{
+						{
+							Operator: corev1.TolerationOpExists,
+							Effect:   corev1.TaintEffectNoSchedule,
+						},
+					},
 					SchedulerName: "kombiner-scheduler",
 					Containers: []corev1.Container{
 						{
