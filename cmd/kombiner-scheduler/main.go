@@ -6,6 +6,7 @@ import (
 
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 
+	_ "kombiner/pkg/apis/scheduler"
 	"kombiner/pkg/scheduler"
 )
 
