@@ -69,7 +69,7 @@ func TestValidate(t *testing.T) {
 				Queues: []configapi.Queue{
 					{
 						SchedulerName: "default-scheduler",
-						Weight:        -1,
+						Weight:        0,
 						MaxSize:       1,
 					},
 				},

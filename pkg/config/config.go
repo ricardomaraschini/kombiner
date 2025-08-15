@@ -57,8 +57,7 @@ func Encode(scheme *runtime.Scheme, cfg *configapi.Configuration) (string, error
 	return buf.String(), nil
 }
 
-// Load returns a set of controller options and configuration from the given file, if the config file path is empty
-// it used the default configapi values.
+// Load returns a configuration from the given file
 func Load(scheme *runtime.Scheme, configFile string) (configapi.Configuration, error) {
 	cfg := configapi.Configuration{}
 	err := fromFile(configFile, scheme, &cfg)
@@ -70,5 +69,5 @@ func Load(scheme *runtime.Scheme, configFile string) (configapi.Configuration, e
 		return cfg, err
 	}
 
-	return cfg, err
+	return cfg, nil
 }

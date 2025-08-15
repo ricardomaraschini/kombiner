@@ -16,7 +16,7 @@ import (
 // proportional to the sum of all weights provided for the QueueIterator.
 type QueueConfig struct {
 	Name   string
-	Weight int
+	Weight uint
 	Queue  *PlacementRequestQueue
 }
 
@@ -26,9 +26,6 @@ type QueueConfig struct {
 func (c *QueueConfig) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("queue name cannot be empty")
-	}
-	if c.Weight <= 0 {
-		return fmt.Errorf("queue weight must be greater than zero")
 	}
 	if c.Queue == nil {
 		return fmt.Errorf("queue reference cannot be nil")
@@ -135,19 +132,19 @@ func (q *QueueIterator) readOne(ctx context.Context, configs []QueueConfig) (int
 // returns the index of the selected queue based on the weights provided in
 // the QueueConfig. The selection is done in a weighted random manner.
 func (q *QueueIterator) selectNextQueue(configs []QueueConfig) int {
-	var total int
+	var total uint
 	for _, config := range configs {
 		total += config.Weight
 	}
 
 	// select a random number between 1 and total + 1. this random number
 	// will fit somewhere in the sum of all individual weights.
-	selected := rand.Intn(total) + 1
+	selected := uint(rand.Intn(int(total)) + 1)
 
 	// we keep summing the weights until we find the sum to be greater than
 	// or equal to the selected number. this means that the queue at that
 	// index is the one we should process next.
-	var sum int
+	var sum uint
 	for i, config := range configs {
 		if sum += config.Weight; selected <= sum {
 			return i

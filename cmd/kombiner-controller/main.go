@@ -19,7 +19,7 @@ import (
 
 	configapi "kombiner/pkg/apis/config/v1alpha1"
 	kombinerapi "kombiner/pkg/apis/kombiner/v1alpha1"
-	"kombiner/pkg/config"
+	kombinerconfig "kombiner/pkg/config"
 	"kombiner/pkg/controller"
 	clientset "kombiner/pkg/generated/clientset/versioned"
 	informers "kombiner/pkg/generated/informers/externalversions"
@@ -34,7 +34,6 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-
 	utilruntime.Must(kombinerapi.AddToScheme(scheme))
 	utilruntime.Must(configapi.AddToScheme(scheme))
 }
@@ -50,24 +49,24 @@ func main() {
 
 	logger.Info("placement request consroller starting", "version", Version)
 
-	cfg, err := getConfig(configFile, logger)
+	config, err := getConfig(configFile, logger)
 	if err != nil {
 		logger.Error(err, "Unable to load the configuration")
 		return
 	}
 
-	config := ctrl.GetConfigOrDie()
-	if config.UserAgent == "" {
-		config.UserAgent = fmt.Sprintf("kombiner/%s (%s/%s)", Version, runtime.GOOS, runtime.GOARCH)
+	kubeConfig := ctrl.GetConfigOrDie()
+	if kubeConfig.UserAgent == "" {
+		kubeConfig.UserAgent = fmt.Sprintf("kombiner/%s (%s/%s)", Version, runtime.GOOS, runtime.GOARCH)
 	}
 
-	kubecli, err := kubernetes.NewForConfig(config)
+	kubecli, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
 		logger.Error(err, "error building kubernetes client")
 		return
 	}
 
-	prcli, err := clientset.NewForConfig(config)
+	prcli, err := clientset.NewForConfig(kubeConfig)
 	if err != nil {
 		logger.Error(err, "error building kubernetes clientset")
 		return
@@ -78,7 +77,7 @@ func main() {
 
 	controller, err := controller.New(
 		ctx,
-		cfg,
+		config,
 		prcli,
 		kubecli.CoreV1(),
 		prInformerFactory.Kombiner().V1alpha1().PlacementRequests(),
@@ -97,14 +96,14 @@ func main() {
 }
 
 func getConfig(configFile string, logger klog.Logger) (configapi.Configuration, error) {
-	cfg, err := config.Load(scheme, configFile)
+	config, err := kombinerconfig.Load(scheme, configFile)
 	if err != nil {
-		return cfg, err
+		return config, err
 	}
-	cfgStr, err := config.Encode(scheme, &cfg)
+	configStr, err := kombinerconfig.Encode(scheme, &config)
 	if err != nil {
-		return cfg, err
+		return config, err
 	}
-	logger.Info("Successfully loaded configuration", "config", cfgStr)
-	return cfg, nil
+	logger.Info("Successfully loaded configuration", "config", configStr)
+	return config, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -176,14 +177,12 @@ func (prc *PlacementRequestController) enqueue(obj interface{}) {
 	// at this point we do not have a queue for the scheduler name, so we
 	// need to create one and enqueue the PlacementRequest. XXX more logging
 	// is needed here.
-	queueCfgIdx := -1
-	for idx, queue := range prc.cfg.Queues {
-		if queue.SchedulerName == pr.Spec.SchedulerName {
-			queueCfgIdx = idx
-			break
-		}
-	}
-
+	queueCfgIdx := slices.IndexFunc(
+		prc.cfg.Queues,
+		func(queueCfg configapi.Queue) bool {
+			return queueCfg.SchedulerName == pr.Spec.SchedulerName
+		},
+	)
 	if queueCfgIdx == -1 {
 		prc.logger.Error(errors.New("missing queue configuration"), "unable to create a new queue", "schedulerName", pr.Spec.SchedulerName)
 		return

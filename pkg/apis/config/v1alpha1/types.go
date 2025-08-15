@@ -43,11 +43,11 @@ type Queue struct {
 
 	// Weight determines how often a scheduler's placement requests get reconciled
 	// compared to other schedulers
-	Weight int `json:"weight"`
+	Weight uint `json:"weight"`
 
 	// MaxSize bounds the maximum size of a placement requests.
 	// I.e. how many pod-to-node assignments can be listed in a placement request.
-	MaxSize int `json:"maxSize"`
+	MaxSize uint `json:"maxSize"`
 
 	// Plugins configures a list of enabled/disabled plugins for a scheduler
 	// E.g. the scheduling framework provides many native plugins. Yet, some

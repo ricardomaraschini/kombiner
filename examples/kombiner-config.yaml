@@ -3,7 +3,7 @@ kind: Configuration
 queues:
 - schedulerName: default-scheduler
   weight: 50
-  maxSize: 1 # 1 no batch scheduling, -1 unlimited, N limited
+  maxSize: 1 # 1 no batch scheduling, N batch scheduling
   plugins: # enabling per scheduler
     validate:
       enabled:
