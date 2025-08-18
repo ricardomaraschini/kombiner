@@ -12,6 +12,7 @@ require (
 	k8s.io/client-go v0.33.3
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kubernetes v1.33.3
+	sigs.k8s.io/controller-runtime v0.21.0
 )
 
 require (
@@ -29,6 +30,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
+	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
@@ -99,6 +101,7 @@ require (
 	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
 	golang.org/x/tools v0.32.0 // indirect
+	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241209162323-e6fa225c2576 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250102185135-69823020774d // indirect
 	google.golang.org/grpc v1.69.4 // indirect

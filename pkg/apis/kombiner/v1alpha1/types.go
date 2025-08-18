@@ -158,6 +158,7 @@ type PlacementRequestBindingResult struct {
 	Message string                 `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
 }
 
+// +k8s:defaulter-gen=true
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:subresource:status

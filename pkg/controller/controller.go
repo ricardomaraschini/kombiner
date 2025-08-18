@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"slices"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -10,6 +12,7 @@ import (
 	corev1listers "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 
+	configapi "kombiner/pkg/apis/config/v1alpha1"
 	"kombiner/pkg/apis/kombiner/v1alpha1"
 	client "kombiner/pkg/generated/clientset/versioned"
 	informer "kombiner/pkg/generated/informers/externalversions/kombiner/v1alpha1"
@@ -21,6 +24,8 @@ import (
 // PlacementRequestController is a controller for handling PlacementRequests.
 type PlacementRequestController struct {
 	options
+
+	cfg configapi.Configuration
 
 	prlister   lister.PlacementRequestLister
 	podlister  corev1listers.PodLister
@@ -170,12 +175,22 @@ func (prc *PlacementRequestController) enqueue(obj interface{}) {
 	}
 
 	// at this point we do not have a queue for the scheduler name, so we
-	// need to create one and enqueue the PlacementRequest. XXX Weight here
-	// should be read from the configuration file. Also, some more logging
+	// need to create one and enqueue the PlacementRequest. XXX more logging
 	// is needed here.
+	queueCfgIdx := slices.IndexFunc(
+		prc.cfg.Queues,
+		func(queueCfg configapi.Queue) bool {
+			return queueCfg.SchedulerName == pr.Spec.SchedulerName
+		},
+	)
+	if queueCfgIdx == -1 {
+		prc.logger.Error(errors.New("missing queue configuration"), "unable to create a new queue", "schedulerName", pr.Spec.SchedulerName)
+		return
+	}
+
 	config := queue.QueueConfig{
 		Name:   pr.Spec.SchedulerName,
-		Weight: 1,
+		Weight: prc.cfg.Queues[queueCfgIdx].Weight,
 		Queue:  queue.NewPlacementRequestQueue(),
 	}
 
@@ -190,6 +205,7 @@ func (prc *PlacementRequestController) enqueue(obj interface{}) {
 // New returns a PlacementRequest controller.
 func New(
 	ctx context.Context,
+	cfg configapi.Configuration,
 	client client.Interface,
 	coreclient corev1client.CoreV1Interface,
 	informer informer.PlacementRequestInformer,
@@ -208,6 +224,7 @@ func New(
 
 	controller := &PlacementRequestController{
 		options:    options,
+		cfg:        cfg,
 		client:     client,
 		coreclient: coreclient,
 		podlister:  podlister,
