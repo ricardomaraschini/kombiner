@@ -27,7 +27,7 @@ type PlacementRequestController struct {
 	podlister  corev1listers.PodLister
 	client     client.Interface
 	coreclient corev1client.CoreV1Interface
-	queues     map[string]*queue.PlacementRequestQueue
+	queues     map[string]queue.QueueConfig
 	iterator   *queue.QueueIterator
 }
 
@@ -155,22 +155,54 @@ func (prc *PlacementRequestController) AddEventHandlers(informer informer.Placem
 // function responsibility is to enqueue the respective PlacementRequest object
 // into one of our internal queues. We have one internal queue per scheduler
 // name. If a queue for the scheduler name does not exist, we create it
-// automatically.
+// automatically. We should not take much long here as we haven't not yet
+// enqueued the placement request and there may be more events happening. We
+// do some basic validation here and in case of failure we just try to
+// reject the PlacementRequest.
 func (prc *PlacementRequestController) enqueue(obj interface{}) {
 	pr, ok := obj.(*v1alpha1.PlacementRequest)
 	if !ok || pr.Spec.SchedulerName == "" {
 		return
 	}
 
-	// We only process placement requests for known schedulers.
-	queue, ok := prc.queues[pr.Spec.SchedulerName]
-	if !ok {
-		err := fmt.Errorf("missing queue %q configuration", pr.Spec.SchedulerName)
-		prc.logger.Error(err, "unable to enqueue placement request")
+	qcfg, found := prc.queues[pr.Spec.SchedulerName]
+	if !found {
+		reason, msg := "QueueNotFound", "Scheduler queue not found"
+		prc.TryToRejectPlacementRequest(pr, reason, msg)
 		return
 	}
 
-	queue.Push(pr)
+	if len(pr.Spec.Bindings) > int(qcfg.MaxSize) {
+		reason, msg := "PlacementRequestTooLarge", "Placement request too large"
+		prc.TryToRejectPlacementRequest(pr, reason, msg)
+		return
+	}
+
+	qcfg.QueueRef.Push(pr)
+}
+
+// TryToRejectPlacementRequest should be used when rejecting a PlacementRequest
+// without worrying about possible failures when doing so. This function uses a
+// hard coded timeout and does not return (but logs) errors.
+func (prc *PlacementRequestController) TryToRejectPlacementRequest(
+	pr *v1alpha1.PlacementRequest, reason, message string,
+) {
+	prid := map[string]string{"name": pr.Name, "namespace": pr.Namespace}
+	prc.logger.V(5).Info("trying to reject placement request", "obj", prid)
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(), prc.options.tryToRejectTimeout,
+	)
+	defer cancel()
+
+	pr.Status.Result = v1alpha1.PlacementRequestResultRejected
+	pr.Status.Reason = reason
+	pr.Status.Message = message
+
+	prqclient := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
+	if _, err := prqclient.UpdateStatus(ctx, pr, metav1.UpdateOptions{}); err != nil {
+		prc.logger.Error(err, "failed to reject placement request", "obj", prid)
+	}
 }
 
 // New returns a PlacementRequest controller.

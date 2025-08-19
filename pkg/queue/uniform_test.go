@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"kombiner/pkg/apis/config/v1alpha1"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,19 +13,25 @@ func TestUniformReader_next(t *testing.T) {
 
 	configs := QueueConfigs{
 		{
-			Name:   "scheduler-1",
-			Weight: 7,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: v1alpha1.Queue{
+				SchedulerName: "scheduler-1",
+				Weight:        7,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-2",
-			Weight: 2,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: v1alpha1.Queue{
+				SchedulerName: "scheduler-2",
+				Weight:        2,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-3",
-			Weight: 1,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: v1alpha1.Queue{
+				SchedulerName: "scheduler-3",
+				Weight:        1,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 	}
 
@@ -36,7 +43,7 @@ func TestUniformReader_next(t *testing.T) {
 	iterations := 10000000
 	for range iterations {
 		next := uniform.next(configs)
-		counters[configs[next].Name]++
+		counters[configs[next].SchedulerName]++
 	}
 
 	percentage := map[string]int{}

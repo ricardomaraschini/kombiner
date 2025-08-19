@@ -48,7 +48,7 @@ func (r *RoundRobinReader) Read(ctx context.Context) *v1alpha1.PlacementRequest 
 		}
 	}
 
-	if pr := r.configs[index].Queue.Pop(); pr != nil {
+	if pr := r.configs[index].QueueRef.Pop(); pr != nil {
 		r.configs[index].BindingsRead += len(pr.Spec.Bindings)
 		return pr
 	}
@@ -64,7 +64,7 @@ func (r *RoundRobinReader) Read(ctx context.Context) *v1alpha1.PlacementRequest 
 // empty returns true if all queues are empty.
 func (r *RoundRobinReader) empty() bool {
 	for _, cfg := range r.configs {
-		if cfg.Queue.Len() > 0 {
+		if cfg.QueueRef.Len() > 0 {
 			return false
 		}
 	}

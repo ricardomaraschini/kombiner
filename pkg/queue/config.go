@@ -11,23 +11,26 @@ import (
 // determines how often the queue will be processed in each iteration and it is
 // proportional to the sum of all weights provided for the QueueIterator.
 type QueueConfig struct {
-	Name   string
-	Weight uint
-	Queue  *PlacementRequestQueue
+	v1alpha1.Queue
+
+	QueueRef *PlacementRequestQueue
 }
 
 // Validate checks the QueueConfig for correctness. We ensure that the queue
 // has a name, its weight is greater than zero and that we have a valid pointer
 // to a PlacementRequestQueue.
 func (c *QueueConfig) Validate() error {
-	if c.Name == "" {
+	if c.SchedulerName == "" {
 		return fmt.Errorf("queue name cannot be empty")
-	}
-	if c.Queue == nil {
-		return fmt.Errorf("queue reference cannot be nil")
 	}
 	if c.Weight == 0 {
 		return fmt.Errorf("queue weight must be greater than zero")
+	}
+	if c.MaxSize == 0 {
+		return fmt.Errorf("queue max size must be greater than zero")
+	}
+	if c.QueueRef == nil {
+		return fmt.Errorf("queue reference cannot be nil")
 	}
 	return nil
 }
@@ -39,10 +42,10 @@ type QueueConfigs []QueueConfig
 // ToMap converts the QueueConfigs to a map where the key is the queue name
 // and the value is the PlacementRequestQueue. Multiple QueueConfigs for the
 // same queue name will overwrite each other.
-func (c QueueConfigs) ToMap() map[string]*PlacementRequestQueue {
-	m := make(map[string]*PlacementRequestQueue, len(c))
+func (c QueueConfigs) ToMap() map[string]QueueConfig {
+	m := make(map[string]QueueConfig, len(c))
 	for _, cfg := range c {
-		m[cfg.Name] = cfg.Queue
+		m[cfg.SchedulerName] = cfg
 	}
 	return m
 }
@@ -51,7 +54,7 @@ func (c QueueConfigs) ToMap() map[string]*PlacementRequestQueue {
 // configs slice.
 func (c *QueueConfigs) AddPushHandler(handler func()) {
 	for _, config := range *c {
-		config.Queue.AddPushHandler(handler)
+		config.QueueRef.AddPushHandler(handler)
 	}
 }
 
@@ -60,12 +63,19 @@ func (c *QueueConfigs) AddPushHandler(handler func()) {
 func (c QueueConfigs) Validate() error {
 	seen := map[string]bool{}
 	for _, cfg := range c {
-		if _, ok := seen[cfg.Name]; ok {
-			return fmt.Errorf("duplicate config for queue %q", cfg.Name)
+		if _, ok := seen[cfg.SchedulerName]; ok {
+			return fmt.Errorf(
+				"duplicate config for scheduler %q",
+				cfg.SchedulerName,
+			)
 		}
-		seen[cfg.Name] = true
+		seen[cfg.SchedulerName] = true
 		if err := cfg.Validate(); err != nil {
-			return fmt.Errorf("queue %q: %w", cfg.Name, err)
+			return fmt.Errorf(
+				"invalid config for scheduler %q: %w",
+				cfg.SchedulerName,
+				err,
+			)
 		}
 	}
 	return nil
@@ -77,11 +87,9 @@ func QueueConfigFromV1Alpha1Config(raw v1alpha1.Configuration) QueueConfigs {
 	configs := QueueConfigs{}
 	for _, config := range raw.Queues {
 		configs = append(
-			configs,
-			QueueConfig{
-				Name:   config.SchedulerName,
-				Weight: config.Weight,
-				Queue:  NewPlacementRequestQueue(),
+			configs, QueueConfig{
+				Queue:    config,
+				QueueRef: NewPlacementRequestQueue(),
 			},
 		)
 	}

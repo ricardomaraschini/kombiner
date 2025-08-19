@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	configv1alpha1 "kombiner/pkg/apis/config/v1alpha1"
 	"kombiner/pkg/apis/kombiner/v1alpha1"
 	"testing"
 
@@ -23,16 +24,16 @@ func TestRoundRobinReader_Read(t *testing.T) {
 					MaximumBindings: 2,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "A",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "A"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 				{
 					MaximumBindings: 2,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "B",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "B"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 			},
@@ -79,16 +80,16 @@ func TestRoundRobinReader_Read(t *testing.T) {
 					MaximumBindings: 2,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "A",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "A"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 				{
 					MaximumBindings: 2,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "B",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "B"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 			},
@@ -102,16 +103,16 @@ func TestRoundRobinReader_Read(t *testing.T) {
 					MaximumBindings: 2,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "A",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "A"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 				{
 					MaximumBindings: 2,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "B",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "B"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 			},
@@ -187,24 +188,24 @@ func TestRoundRobinReader_Read(t *testing.T) {
 					MaximumBindings: 1,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "A",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "A"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 				{
 					MaximumBindings: 1,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "B",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "B"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 				{
 					MaximumBindings: 1,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "C",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "C"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 			},
@@ -310,16 +311,16 @@ func TestRoundRobinReader_Read(t *testing.T) {
 					MaximumBindings: 2,
 					BindingsRead:    2,
 					QueueConfig: QueueConfig{
-						Name:  "A",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "A"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 				{
 					MaximumBindings: 2,
 					BindingsRead:    0,
 					QueueConfig: QueueConfig{
-						Name:  "B",
-						Queue: NewPlacementRequestQueue(),
+						Queue:    configv1alpha1.Queue{SchedulerName: "B"},
+						QueueRef: NewPlacementRequestQueue(),
 					},
 				},
 			},
@@ -392,7 +393,7 @@ func TestRoundRobinReader_Read(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			for qidx, prs := range tt.prs {
 				for _, pr := range prs {
-					tt.configs[qidx].QueueConfig.Queue.Push(&pr)
+					tt.configs[qidx].QueueConfig.QueueRef.Push(&pr)
 				}
 			}
 
@@ -418,32 +419,96 @@ func TestRoundRobinReader_next(t *testing.T) {
 		{
 			name: "first config not exhausted",
 			configs: []ExtendedQueueConfig{
-				{QueueConfig: QueueConfig{Name: "A"}, MaximumBindings: 2, BindingsRead: 0},
-				{QueueConfig: QueueConfig{Name: "B"}, MaximumBindings: 3, BindingsRead: 1},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "A",
+						},
+					},
+					MaximumBindings: 2,
+					BindingsRead:    0,
+				},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "B",
+						},
+					},
+					MaximumBindings: 3,
+					BindingsRead:    1,
+				},
 			},
 			want: 0,
 		},
 		{
 			name: "second config available",
 			configs: []ExtendedQueueConfig{
-				{QueueConfig: QueueConfig{Name: "A"}, MaximumBindings: 2, BindingsRead: 2},
-				{QueueConfig: QueueConfig{Name: "B"}, MaximumBindings: 3, BindingsRead: 1},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "A",
+						},
+					},
+					MaximumBindings: 2,
+					BindingsRead:    2,
+				},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "B",
+						},
+					},
+					MaximumBindings: 3,
+					BindingsRead:    1,
+				},
 			},
 			want: 1,
 		},
 		{
 			name: "overflown first config",
 			configs: []ExtendedQueueConfig{
-				{QueueConfig: QueueConfig{Name: "A"}, MaximumBindings: 2, BindingsRead: 8},
-				{QueueConfig: QueueConfig{Name: "B"}, MaximumBindings: 3, BindingsRead: 1},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "A",
+						},
+					},
+					MaximumBindings: 2,
+					BindingsRead:    8,
+				},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "B",
+						},
+					},
+					MaximumBindings: 3,
+					BindingsRead:    1,
+				},
 			},
 			want: 1,
 		},
 		{
 			name: "all configs exhausted",
 			configs: []ExtendedQueueConfig{
-				{QueueConfig: QueueConfig{Name: "A"}, MaximumBindings: 1, BindingsRead: 1},
-				{QueueConfig: QueueConfig{Name: "B"}, MaximumBindings: 2, BindingsRead: 2},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "A",
+						},
+					},
+					MaximumBindings: 1,
+					BindingsRead:    1,
+				},
+				{
+					QueueConfig: QueueConfig{
+						Queue: configv1alpha1.Queue{
+							SchedulerName: "B",
+						},
+					},
+					MaximumBindings: 2,
+					BindingsRead:    2,
+				},
 			},
 			want: -1,
 		},
@@ -463,34 +528,59 @@ func TestRoundRobinReader_next(t *testing.T) {
 func TestNewRoundRobinReader(t *testing.T) {
 	require := require.New(t)
 	configs := QueueConfigs{
-		{Name: "A", Weight: 2},
-		{Name: "B", Weight: 3},
-		{Name: "C", Weight: 4},
-		{Name: "D", Weight: 2},
-		{Name: "E", Weight: 13},
+		{Queue: configv1alpha1.Queue{SchedulerName: "A", Weight: 2}},
+		{Queue: configv1alpha1.Queue{SchedulerName: "B", Weight: 3}},
+		{Queue: configv1alpha1.Queue{SchedulerName: "C", Weight: 4}},
+		{Queue: configv1alpha1.Queue{SchedulerName: "D", Weight: 2}},
+		{Queue: configv1alpha1.Queue{SchedulerName: "E", Weight: 13}},
 	}
 
 	reader := NewRoundRobinReader(configs)
 
 	expected := []ExtendedQueueConfig{
 		{
-			QueueConfig:     QueueConfig{Name: "A", Weight: 2},
+			QueueConfig: QueueConfig{
+				Queue: configv1alpha1.Queue{
+					SchedulerName: "A",
+					Weight:        2,
+				},
+			},
 			MaximumBindings: MinimumBindings,
 		},
 		{
-			QueueConfig:     QueueConfig{Name: "B", Weight: 3},
+			QueueConfig: QueueConfig{
+				Queue: configv1alpha1.Queue{
+					SchedulerName: "B",
+					Weight:        3,
+				},
+			},
 			MaximumBindings: 15,
 		},
 		{
-			QueueConfig:     QueueConfig{Name: "C", Weight: 4},
+			QueueConfig: QueueConfig{
+				Queue: configv1alpha1.Queue{
+					SchedulerName: "C",
+					Weight:        4,
+				},
+			},
 			MaximumBindings: 20,
 		},
 		{
-			QueueConfig:     QueueConfig{Name: "D", Weight: 2},
+			QueueConfig: QueueConfig{
+				Queue: configv1alpha1.Queue{
+					SchedulerName: "D",
+					Weight:        2,
+				},
+			},
 			MaximumBindings: MinimumBindings,
 		},
 		{
-			QueueConfig:     QueueConfig{Name: "E", Weight: 13},
+			QueueConfig: QueueConfig{
+				Queue: configv1alpha1.Queue{
+					SchedulerName: "E",
+					Weight:        13,
+				},
+			},
 			MaximumBindings: 65,
 		},
 	}

@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	configv1alpha1 "kombiner/pkg/apis/config/v1alpha1"
 	"kombiner/pkg/apis/kombiner/v1alpha1"
 )
 
@@ -17,49 +19,76 @@ func TestQueueIteratorFairness(t *testing.T) {
 
 	configs := QueueConfigs{
 		{
-			Name:   "scheduler-1",
-			Weight: 35,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-1",
+				Weight:        35,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-2",
-			Weight: 35,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-2",
+				Weight:        35,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-3",
-			Weight: 10,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-3",
+				Weight:        10,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-4",
-			Weight: 5,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-4",
+				Weight:        5,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-5",
-			Weight: 5,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-5",
+				Weight:        5,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-6",
-			Weight: 3,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-6",
+				Weight:        3,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-7",
-			Weight: 3,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-7",
+				Weight:        3,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-8",
-			Weight: 3,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-8",
+				Weight:        3,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-9",
-			Weight: 1,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-9",
+				Weight:        1,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 	}
 
@@ -72,7 +101,7 @@ func TestQueueIteratorFairness(t *testing.T) {
 		go func(idx int) {
 			name := fmt.Sprintf("scheduler-%d", idx%len(configs)+1)
 			for range 1000000 {
-				configs[idx].Queue.Push(
+				configs[idx].QueueRef.Push(
 					&v1alpha1.PlacementRequest{
 						Spec: v1alpha1.PlacementRequestSpec{
 							SchedulerName: name,
@@ -139,9 +168,12 @@ func TestQueueIteratorReadBeforeWrite(t *testing.T) {
 
 	configs := QueueConfigs{
 		{
-			Name:   "scheduler-1",
-			Weight: 1,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-1",
+				Weight:        1,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 	}
 
@@ -152,7 +184,7 @@ func TestQueueIteratorReadBeforeWrite(t *testing.T) {
 
 	go func() {
 		time.Sleep(time.Second)
-		configs[0].Queue.Push(&v1alpha1.PlacementRequest{})
+		configs[0].QueueRef.Push(&v1alpha1.PlacementRequest{})
 	}()
 
 	ticker := time.NewTicker(2 * time.Second)
@@ -165,28 +197,37 @@ func TestQueueIteratorReadBeforeWrite(t *testing.T) {
 }
 
 func TestQueueIteratorMultipleConcurrent(t *testing.T) {
-	assert := assert.New(t)
+	require := require.New(t)
 
 	configs := QueueConfigs{
 		{
-			Name:   "scheduler-1",
-			Weight: 35,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-1",
+				Weight:        35,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-2",
-			Weight: 35,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-2",
+				Weight:        35,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-3",
-			Weight: 10,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-3",
+				Weight:        10,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 	}
 
 	iterator, err := NewQueueIterator(configs)
-	assert.NoError(err, "error creating iterator")
+	require.NoError(err, "error creating iterator")
 
 	go iterator.Run(context.Background())
 
@@ -196,10 +237,10 @@ func TestQueueIteratorMultipleConcurrent(t *testing.T) {
 			for range 1000 {
 				sleep := rand.Intn(10)
 				time.Sleep(time.Duration(sleep) * time.Millisecond)
-				config.Queue.Push(
+				config.QueueRef.Push(
 					&v1alpha1.PlacementRequest{
 						Spec: v1alpha1.PlacementRequestSpec{
-							SchedulerName: config.Name,
+							SchedulerName: config.SchedulerName,
 						},
 					},
 				)
@@ -227,23 +268,29 @@ func TestQueueIteratorMultipleConcurrent(t *testing.T) {
 }
 
 func TestQueueContextCancellation(t *testing.T) {
-	assert := assert.New(t)
+	require := require.New(t)
 
 	configs := QueueConfigs{
 		{
-			Name:   "scheduler-1",
-			Weight: 10,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-1",
+				Weight:        10,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 		{
-			Name:   "scheduler-2",
-			Weight: 10,
-			Queue:  NewPlacementRequestQueue(),
+			Queue: configv1alpha1.Queue{
+				SchedulerName: "scheduler-2",
+				Weight:        10,
+				MaxSize:       100,
+			},
+			QueueRef: NewPlacementRequestQueue(),
 		},
 	}
 
 	iterator, err := NewQueueIterator(configs)
-	assert.NoError(err, "error creating iterator")
+	require.NoError(err, "error creating iterator")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	runEnded := make(chan struct{})
@@ -257,7 +304,7 @@ func TestQueueContextCancellation(t *testing.T) {
 			for {
 				sleep := time.Duration(rand.Intn(100))
 				time.Sleep(sleep * time.Millisecond)
-				configs[i].Queue.Push(&v1alpha1.PlacementRequest{})
+				configs[i].QueueRef.Push(&v1alpha1.PlacementRequest{})
 			}
 		}(i)
 	}
