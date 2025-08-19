@@ -10,35 +10,12 @@ import (
 	"kombiner/pkg/apis/kombiner/v1alpha1"
 )
 
-// QueueConfig defines the configuration for a queue in the queue iterator. It
-// includes the name of the queue, its weight, and the actual queue. The Weight
-// determines how often the queue will be processed in each iteration and it is
-// proportional to the sum of all weights provided for the QueueIterator.
-type QueueConfig struct {
-	Name   string
-	Weight uint
-	Queue  *PlacementRequestQueue
-}
-
-// Validate checks the QueueConfig for correctness. We ensure that the queue
-// has a name, its weight is greater than zero and that we have a valid pointer
-// to a PlacementRequestQueue.
-func (c *QueueConfig) Validate() error {
-	if c.Name == "" {
-		return fmt.Errorf("queue name cannot be empty")
-	}
-	if c.Queue == nil {
-		return fmt.Errorf("queue reference cannot be nil")
-	}
-	return nil
-}
-
 // QueueIterator is an entity that iterates over multiple queues popping
 // PlacementRequests from them respecting their Weight.
 type QueueIterator struct {
 	Next    chan *v1alpha1.PlacementRequest
 	mtx     sync.Mutex
-	configs []QueueConfig
+	configs QueueConfigs
 	resume  chan bool
 }
 
@@ -51,20 +28,6 @@ func (q *QueueIterator) Resume() {
 	case q.resume <- true:
 	default:
 	}
-}
-
-// AddQueue adds a new queue to the QueueIterator.
-func (q *QueueIterator) AddQueue(cfg QueueConfig) error {
-	if err := cfg.Validate(); err != nil {
-		return fmt.Errorf("error adding queue: %w", err)
-	}
-
-	q.mtx.Lock()
-	defer q.mtx.Unlock()
-
-	cfg.Queue.AddPushHandler(q.Resume)
-	q.configs = append(q.configs, cfg)
-	return nil
 }
 
 // Run starts the queue iterator. We start with a list with all queues and we
@@ -159,19 +122,17 @@ func (q *QueueIterator) selectNextQueue(configs []QueueConfig) int {
 // NewQueueIterator creates a queue iterator based on the provided QueueConfig
 // objects. This function registers a custom push handler for each queue so it
 // is capable of resuming reading from queues.
-func NewQueueIterator(configs ...QueueConfig) (*QueueIterator, error) {
+func NewQueueIterator(configs QueueConfigs) (*QueueIterator, error) {
+	if err := configs.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid queue configuration: %w", err)
+	}
+
 	it := &QueueIterator{
 		Next:    make(chan *v1alpha1.PlacementRequest),
 		resume:  make(chan bool, 2),
 		configs: configs,
 	}
 
-	for _, qcfg := range configs {
-		if err := qcfg.Validate(); err != nil {
-			return nil, fmt.Errorf("error creating iterator: %w", err)
-		}
-		qcfg.Queue.AddPushHandler(it.Resume)
-	}
-
+	configs.AddPushHandler(it.Resume)
 	return it, nil
 }

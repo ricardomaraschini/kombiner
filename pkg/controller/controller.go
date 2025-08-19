@@ -2,9 +2,7 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"slices"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,8 +22,6 @@ import (
 // PlacementRequestController is a controller for handling PlacementRequests.
 type PlacementRequestController struct {
 	options
-
-	cfg configapi.Configuration
 
 	prlister   lister.PlacementRequestLister
 	podlister  corev1listers.PodLister
@@ -166,40 +162,15 @@ func (prc *PlacementRequestController) enqueue(obj interface{}) {
 		return
 	}
 
-	// if we already have a queue for the scheduler name, we just push
-	// the PlacementRequest into it. they are going to be sorted by their
-	// priority.
-	if queue, ok := prc.queues[pr.Spec.SchedulerName]; ok {
-		queue.Push(pr)
+	// We only process placement requests for known schedulers.
+	queue, ok := prc.queues[pr.Spec.SchedulerName]
+	if !ok {
+		err := fmt.Errorf("missing queue %q configuration", pr.Spec.SchedulerName)
+		prc.logger.Error(err, "unable to enqueue placement request")
 		return
 	}
 
-	// at this point we do not have a queue for the scheduler name, so we
-	// need to create one and enqueue the PlacementRequest. XXX more logging
-	// is needed here.
-	queueCfgIdx := slices.IndexFunc(
-		prc.cfg.Queues,
-		func(queueCfg configapi.Queue) bool {
-			return queueCfg.SchedulerName == pr.Spec.SchedulerName
-		},
-	)
-	if queueCfgIdx == -1 {
-		prc.logger.Error(errors.New("missing queue configuration"), "unable to create a new queue", "schedulerName", pr.Spec.SchedulerName)
-		return
-	}
-
-	config := queue.QueueConfig{
-		Name:   pr.Spec.SchedulerName,
-		Weight: prc.cfg.Queues[queueCfgIdx].Weight,
-		Queue:  queue.NewPlacementRequestQueue(),
-	}
-
-	if err := prc.iterator.AddQueue(config); err != nil {
-		return
-	}
-
-	prc.queues[pr.Spec.SchedulerName] = config.Queue
-	config.Queue.Push(pr)
+	queue.Push(pr)
 }
 
 // New returns a PlacementRequest controller.
@@ -217,19 +188,23 @@ func New(
 		opt(&options)
 	}
 
-	iterator, err := queue.NewQueueIterator()
+	configs := queue.QueueConfigFromV1Alpha1Config(cfg)
+	if err := configs.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid queue configuration: %w", err)
+	}
+
+	iterator, err := queue.NewQueueIterator(configs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create internal queue iterator: %w", err)
 	}
 
 	controller := &PlacementRequestController{
 		options:    options,
-		cfg:        cfg,
 		client:     client,
 		coreclient: coreclient,
 		podlister:  podlister,
 		prlister:   informer.Lister(),
-		queues:     map[string]*queue.PlacementRequestQueue{},
+		queues:     configs.ToMap(),
 		iterator:   iterator,
 	}
 
