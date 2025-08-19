@@ -39,9 +39,17 @@ type PlacementRequestQueue struct {
 // Push adds a PlacementRequest to the queue. The PlacementRequest is wrapped
 // in a PrioritizedPlacementRequest to provide the necessary priority func.
 // Push handlers are called after the PlacementRequest is added to the queue.
+// It is the role of the caller to ensure that the PlacementRequest points to
+// a valid object and not directly to nil, the latter will cause this to
+// panic immediately.
 func (q *PlacementRequestQueue) Push(pr *v1alpha1.PlacementRequest) {
 	q.mtx.Lock()
 	defer q.mtx.Unlock()
+
+	if pr == nil {
+		// this should never happen and if it does we should stop.
+		panic("cannot push a nil PlacementRequest to the queue")
+	}
 
 	wrapped := &PrioritizedPlacementRequest{PlacementRequest: pr}
 	heap.Push(q.queue, wrapped)
@@ -59,7 +67,12 @@ func (q *PlacementRequestQueue) Pop() *v1alpha1.PlacementRequest {
 	if q.queue.Len() == 0 {
 		return nil
 	}
-	result := heap.Pop(q.queue).(*PrioritizedPlacementRequest)
+
+	result, ok := heap.Pop(q.queue).(*PrioritizedPlacementRequest)
+	if !ok || result.PlacementRequest == nil {
+		panic("PlacementRequest queue found an unexpected object")
+	}
+
 	return result.PlacementRequest
 }
 
