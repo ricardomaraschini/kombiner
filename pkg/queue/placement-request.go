@@ -71,6 +71,13 @@ func (q *PlacementRequestQueue) AddPushHandler(handler func()) {
 	q.pushHandlers = append(q.pushHandlers, handler)
 }
 
+// Len returns the number of PlacementRequests awaiting in the inner queue.
+func (q *PlacementRequestQueue) Len() int {
+	q.mtx.Lock()
+	defer q.mtx.Unlock()
+	return q.queue.Len()
+}
+
 // NewPlacementRequestQueue creates a new PlacementRequestQueue.
 func NewPlacementRequestQueue() *PlacementRequestQueue {
 	return &PlacementRequestQueue{

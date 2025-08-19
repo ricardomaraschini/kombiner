@@ -23,6 +23,20 @@ import (
 // +k8s:defaulter-gen=true
 // +kubebuilder:object:root=true
 
+type FairnessAlgorithm string
+
+const (
+	// RoundRobin is the default algorithm that processes placement requests
+	// in a round-robin fashion. It ensures that each scheduler gets a chance
+	// to process its placement requests in a fair manner.
+	RoundRobin FairnessAlgorithm = "RoundRobin"
+
+	// Uniform is an algorithm that processes placement requests in a uniform
+	// manner. It uses a weighted random selection algorithm to determine the
+	// next placement request to process.
+	Uniform FairnessAlgorithm = "Uniform"
+)
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // Configuration is the Schema for the kombinerconfigurations API
 type Configuration struct {
@@ -30,6 +44,13 @@ type Configuration struct {
 
 	// Queues provides configuration for individual queues
 	Queues []Queue `json:"queues"`
+
+	// FairnessAlgorithm defines the algorithm used by the kombiner
+	// controller when selecting the next PlacementRequest to process.
+	// Fairness is controlled by this field. The default value, if not
+	// specified, is RoundRobin.
+	// +kubebuilder:validation:Enum=RoundRobin;Uniform
+	FairnessAlgorithm FairnessAlgorithm `json:"fairnessAlgorithm,omitempty"`
 
 	// Plugins captures a configuration for cluster wide validation
 	// +optional

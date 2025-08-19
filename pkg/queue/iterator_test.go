@@ -15,7 +15,7 @@ import (
 func TestQueueIteratorFairness(t *testing.T) {
 	assert := assert.New(t)
 
-	configs := []QueueConfig{
+	configs := QueueConfigs{
 		{
 			Name:   "scheduler-1",
 			Weight: 35,
@@ -63,7 +63,7 @@ func TestQueueIteratorFairness(t *testing.T) {
 		},
 	}
 
-	iterator, err := NewQueueIterator(configs...)
+	iterator, err := NewQueueIterator(configs)
 	assert.NoError(err, "error creating iterator")
 
 	go iterator.Run(context.Background())
@@ -137,20 +137,22 @@ func TestQueueIteratorFairness(t *testing.T) {
 func TestQueueIteratorReadBeforeWrite(t *testing.T) {
 	assert := assert.New(t)
 
-	config := QueueConfig{
-		Name:   "scheduler-1",
-		Weight: 1,
-		Queue:  NewPlacementRequestQueue(),
+	configs := QueueConfigs{
+		{
+			Name:   "scheduler-1",
+			Weight: 1,
+			Queue:  NewPlacementRequestQueue(),
+		},
 	}
 
-	iterator, err := NewQueueIterator(config)
+	iterator, err := NewQueueIterator(configs)
 	assert.NoError(err, "error creating iterator")
 
 	go iterator.Run(context.Background())
 
 	go func() {
 		time.Sleep(time.Second)
-		config.Queue.Push(&v1alpha1.PlacementRequest{})
+		configs[0].Queue.Push(&v1alpha1.PlacementRequest{})
 	}()
 
 	ticker := time.NewTicker(2 * time.Second)
@@ -162,58 +164,10 @@ func TestQueueIteratorReadBeforeWrite(t *testing.T) {
 	}
 }
 
-func TestQueueIterator_nextQueue(t *testing.T) {
-	assert := assert.New(t)
-
-	configs := []QueueConfig{
-		{
-			Name:   "scheduler-1",
-			Weight: 7,
-			Queue:  NewPlacementRequestQueue(),
-		},
-		{
-			Name:   "scheduler-2",
-			Weight: 2,
-			Queue:  NewPlacementRequestQueue(),
-		},
-		{
-			Name:   "scheduler-3",
-			Weight: 1,
-			Queue:  NewPlacementRequestQueue(),
-		},
-	}
-
-	var iterator QueueIterator
-
-	counters := map[string]int{}
-	iteractions := 10000000
-	for range iteractions {
-		next := iterator.selectNextQueue(configs)
-		counters[configs[next].Name]++
-	}
-
-	percentage := map[string]int{}
-	for name, c := range counters {
-		percentage[name] = int(float64(c) / float64(iteractions) * 100)
-	}
-
-	// ballpark here, we expect the first queue to be selected 70% of the time,
-	// the second queue 20% of the time and the third queue 10% of the time. we
-	// give them a 2% margin of error.
-	assert.GreaterOrEqual(percentage["scheduler-1"], 68, "scheduler-1 should be selected at least 68% of the time")
-	assert.LessOrEqual(percentage["scheduler-1"], 72, "scheduler-1 should be selected at most 72% of the time")
-
-	assert.GreaterOrEqual(percentage["scheduler-2"], 18, "scheduler-2 should be selected at least 18% of the time")
-	assert.LessOrEqual(percentage["scheduler-2"], 22, "scheduler-2 should be selected at most 22% of the time")
-
-	assert.GreaterOrEqual(percentage["scheduler-3"], 8, "scheduler-3 should be selected at least 8% of the time")
-	assert.LessOrEqual(percentage["scheduler-3"], 12, "scheduler-3 should be selected at most 12% of the time")
-}
-
 func TestQueueIteratorMultipleConcurrent(t *testing.T) {
 	assert := assert.New(t)
 
-	configs := []QueueConfig{
+	configs := QueueConfigs{
 		{
 			Name:   "scheduler-1",
 			Weight: 35,
@@ -231,7 +185,7 @@ func TestQueueIteratorMultipleConcurrent(t *testing.T) {
 		},
 	}
 
-	iterator, err := NewQueueIterator(configs...)
+	iterator, err := NewQueueIterator(configs)
 	assert.NoError(err, "error creating iterator")
 
 	go iterator.Run(context.Background())
@@ -275,7 +229,7 @@ func TestQueueIteratorMultipleConcurrent(t *testing.T) {
 func TestQueueContextCancellation(t *testing.T) {
 	assert := assert.New(t)
 
-	configs := []QueueConfig{
+	configs := QueueConfigs{
 		{
 			Name:   "scheduler-1",
 			Weight: 10,
@@ -288,7 +242,7 @@ func TestQueueContextCancellation(t *testing.T) {
 		},
 	}
 
-	iterator, err := NewQueueIterator(configs...)
+	iterator, err := NewQueueIterator(configs)
 	assert.NoError(err, "error creating iterator")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -328,40 +282,5 @@ func TestQueueContextCancellation(t *testing.T) {
 	case <-runEnded:
 	case <-ticker.C:
 		t.Fatalf("timeout waiting for iterator to finish")
-	}
-}
-
-func TestQueueIteratorAddQueue(t *testing.T) {
-	assert := assert.New(t)
-
-	config := QueueConfig{
-		Name:   "scheduler-1",
-		Weight: 10,
-		Queue:  NewPlacementRequestQueue(),
-	}
-
-	iterator, err := NewQueueIterator(config)
-	assert.NoError(err, "error creating iterator")
-
-	go iterator.Run(context.Background())
-
-	go func() {
-		time.Sleep(time.Second)
-		newConfig := QueueConfig{
-			Name:   "scheduler-2",
-			Weight: 10,
-			Queue:  NewPlacementRequestQueue(),
-		}
-		iterator.AddQueue(newConfig)
-		newConfig.Queue.Push(&v1alpha1.PlacementRequest{})
-	}()
-
-	ticker := time.NewTicker(5 * time.Second)
-	select {
-	case <-iterator.Next:
-		ticker.Stop()
-	case <-ticker.C:
-		t.Fatalf("timeout waiting for message from new queue")
-	default:
 	}
 }
