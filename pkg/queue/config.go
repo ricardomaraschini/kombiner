@@ -26,6 +26,9 @@ func (c *QueueConfig) Validate() error {
 	if c.Queue == nil {
 		return fmt.Errorf("queue reference cannot be nil")
 	}
+	if c.Weight == 0 {
+		return fmt.Errorf("queue weight must be greater than zero")
+	}
 	return nil
 }
 

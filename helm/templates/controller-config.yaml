@@ -8,6 +8,8 @@ data:
   config.yaml: |-
     apiVersion: config.kombiner.x-k8s.io/v1alpha1
     kind: Configuration
+    # supported algoriths: RoundRobin and Uniform
+    # fairnessAlgorithm: RoundRobin
     queues:
     - schedulerName: kombiner-scheduler
       weight: 50

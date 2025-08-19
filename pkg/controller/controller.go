@@ -193,7 +193,19 @@ func New(
 		return nil, fmt.Errorf("invalid queue configuration: %w", err)
 	}
 
-	iterator, err := queue.NewQueueIterator(configs)
+	itopts := []queue.QueueIteratorOption{}
+	switch cfg.FairnessAlgorithm {
+	case "", configapi.RoundRobin:
+		options.logger.Info("using the default round-robin fairness algorithm")
+		itopts = append(itopts, queue.WithReaderFactory(queue.NewRoundRobinReader))
+	case configapi.Uniform:
+		options.logger.Info("using the uniform fairness algorithm")
+		itopts = append(itopts, queue.WithReaderFactory(queue.NewUniformReader))
+	default:
+		return nil, fmt.Errorf("unknown fairness algorithm %q", cfg.FairnessAlgorithm)
+	}
+
+	iterator, err := queue.NewQueueIterator(configs, itopts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create internal queue iterator: %w", err)
 	}
