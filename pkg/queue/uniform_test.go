@@ -33,15 +33,15 @@ func TestUniformReader_next(t *testing.T) {
 	require.True(t, ok, "reader should be of type UniformReader")
 
 	counters := map[string]int{}
-	iteractions := 10000000
-	for range iteractions {
+	iterations := 10000000
+	for range iterations {
 		next := uniform.next(configs)
 		counters[configs[next].Name]++
 	}
 
 	percentage := map[string]int{}
 	for name, c := range counters {
-		percentage[name] = int(float64(c) / float64(iteractions) * 100)
+		percentage[name] = int(float64(c) / float64(iterations) * 100)
 	}
 
 	// ballpark here, we expect the first queue to be selected 70% of the time,

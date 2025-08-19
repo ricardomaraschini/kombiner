@@ -30,8 +30,8 @@ func (u *UniformReader) Read(_ context.Context) *v1alpha1.PlacementRequest {
 			return pr
 		}
 
-		// the previus queue returned no message so we can remove it
-		// from the list of queues and try again with the reamining
+		// the previous queue returned no message so we can remove it
+		// from the list of queues and try again with the remaining
 		// ones. we keep doing this until no more queues are left.
 		configs = slices.Delete(configs, qidx, qidx+1)
 	}

@@ -7,7 +7,7 @@ import (
 	"slices"
 )
 
-// MininumBindings is the very minimum binds we will ensure to the queue with
+// MinimumBindings is the very minimum binds we will ensure to the queue with
 // the least weight. Each bind in a PlacementRequest is counted towards this
 // amount.
 const MinimumBindings = 10
@@ -28,11 +28,11 @@ type RoundRobinReader struct {
 // Read keeps reading from the same queue until it is empty or we reached the
 // max of bindings defined per queue. The maximum number of bindings is
 // relative to the weight of reach queue. The queue with the lowest weight
-// receives MininumBindings.
+// receives MinimumBindings.
 func (r *RoundRobinReader) Read(ctx context.Context) *v1alpha1.PlacementRequest {
 	// if the queues are empty at this stage we return nil as there is
 	// nothing else to read. this is also our stop condition for the
-	// recursiver calls.
+	// recursive calls.
 	if r.empty() {
 		return nil
 	}
@@ -80,7 +80,7 @@ func (r *RoundRobinReader) reset() {
 	}
 }
 
-// next function is to retur the next queue from where we should read. this
+// next function is to return the next queue from where we should read. this
 // function iterates over the configs and finds one for which we haven't yet
 // exhausted the maximum number of bindings. If all queues are exhausted
 // it returns -1.
