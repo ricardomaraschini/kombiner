@@ -27,7 +27,7 @@ type RoundRobinReader struct {
 
 // Read keeps reading from the same queue until it is empty or we reached the
 // max of bindings defined per queue. The maximum number of bindings is
-// relative to the weight of reach queue. The queue with the lowest weight
+// relative to the weight of each queue. The queue with the lowest weight
 // receives MinimumBindings.
 func (r *RoundRobinReader) Read(ctx context.Context) *v1alpha1.PlacementRequest {
 	// if the queues are empty at this stage we return nil as there is
