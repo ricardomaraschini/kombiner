@@ -80,8 +80,8 @@ func main() {
 		config,
 		prcli,
 		kubecli.CoreV1(),
-		prInformerFactory.Kombiner().V1alpha1().PlacementRequests(),
-		kubeInformerFactory.Core().V1().Pods().Lister(),
+		prInformerFactory,
+		kubeInformerFactory,
 	)
 	if err != nil {
 		logger.Error(err, "error creating controller")
@@ -90,6 +90,10 @@ func main() {
 
 	kubeInformerFactory.Start(ctx.Done())
 	prInformerFactory.Start(ctx.Done())
+
+	if err := controller.WaitForHandlersSync(ctx); err != nil {
+		logger.Error(err, "handlers are not fully synchronized")
+	}
 
 	logger.Info("controller started, waiting for events")
 	controller.Run(ctx)

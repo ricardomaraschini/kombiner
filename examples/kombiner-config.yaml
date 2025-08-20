@@ -9,3 +9,13 @@ queues:
       enabled:
       - TaintToleration
       - PodTopologySpread
+      - NodeAffinity
+- schedulerName: custom-scheduler
+  weight: 50
+  maxSize: 1 # 1 no batch scheduling, N batch scheduling
+  plugins: # enabling per scheduler
+    validate:
+      enabled:
+      - TaintToleration
+      - PodTopologySpread
+      - NodeAffinity
