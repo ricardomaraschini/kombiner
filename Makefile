@@ -17,7 +17,7 @@ generate: generate-code generate-crds
 install:
 	helm install kombiner -n kube-system ./helm \
 		--wait --timeout 5m0s \
-		--set image.image_name=${IMAGE_NAME} \
+		--set image.repository=${IMAGE_NAME} \
 		--set image.tag=${IMAGE_TAG}
 
 .PHONY: uninstall

@@ -1,3 +1,7 @@
 image:
   repository: kombiner
   tag: latest
+schedulers:
+- name: kombiner-scheduler
+  weight: 50
+  maxSize: 1

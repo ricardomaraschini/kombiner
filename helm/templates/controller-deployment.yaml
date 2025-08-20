@@ -1,0 +1,39 @@
+# this should never be used in production and is intended for testing.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kombiner-controller
+  labels:
+    app: kombiner-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kombiner-controller
+  template:
+    metadata:
+      labels:
+        app: kombiner-controller
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      serviceAccountName: kombiner
+      volumes:
+      - name: controller-config
+        configMap:
+          name: controller-config
+      containers:
+      - name: controller
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: IfNotPresent
+        command:
+        - /usr/local/bin/kombiner-controller
+        args:
+        - --config=/etc/controller/config.yaml
+        - -v=3
+        volumeMounts:
+        - name: controller-config
+          mountPath: /etc/controller/config.yaml
+          subPath: config.yaml
