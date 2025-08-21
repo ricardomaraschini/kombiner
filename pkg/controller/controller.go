@@ -35,13 +35,13 @@ type PlacementRequestController struct {
 // ScheduleOne for each one of them. This is a blocking function that returns
 // only when the provided context is done. XXX some more error handling is
 // needed here.
-func (prc *PlacementRequestController) Run(ctx context.Context) {
-	go prc.iterator.Run(ctx)
+func (controller *PlacementRequestController) Run(ctx context.Context) {
+	go controller.iterator.Run(ctx)
 	for {
 		select {
-		case pr := <-prc.iterator.Next:
-			if err := prc.ScheduleOne(ctx, pr); err != nil {
-				prc.logger.Error(err, "failed to schedule")
+		case pr := <-controller.iterator.Next:
+			if err := controller.ScheduleOne(ctx, pr); err != nil {
+				controller.logger.Error(err, "failed to schedule")
 			}
 		case <-ctx.Done():
 			return
@@ -52,25 +52,25 @@ func (prc *PlacementRequestController) Run(ctx context.Context) {
 // ScheduleOne is the function responsible for evaluating if a PlacementRequest
 // is valid and then bind it to the nodes. This function also sets the status
 // once it is finished.
-func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1alpha1.PlacementRequest) error {
+func (controller *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1alpha1.PlacementRequest) error {
 	prid := map[string]string{"name": pr.Name, "namespace": pr.Namespace}
-	prc.logger.V(3).Info("processing placement request", "obj", prid)
+	controller.logger.V(3).Info("processing placement request", "obj", prid)
 
 	// if the placement request is deleted or if its status is known
 	// (failure or success), we do not need to process it anymore.
 	if pr.DeletionTimestamp != nil || pr.Status.Result != v1alpha1.PlacementRequestResultUnknown {
-		prc.logger.V(3).Info("skipping placement request", "obj", prid)
+		controller.logger.V(3).Info("skipping placement request", "obj", prid)
 		return nil
 	}
 
 	// here we create a few shortcuts to api access entities we are going
 	// to use during this function. these shortcuts are already namespace
 	// scoped.
-	prqclient := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
-	podlister := prc.podlister.Pods(pr.Namespace)
+	prqclient := controller.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
+	podlister := controller.podlister.Pods(pr.Namespace)
 
 	if err := helpers.Validate(pr); err != nil {
-		prc.logger.Error(err, "placement request is not valid", "obj", prid)
+		controller.logger.Error(err, "placement request is not valid", "obj", prid)
 		pr.Status.Result = v1alpha1.PlacementRequestResultRejected
 		pr.Status.Message = err.Error()
 		_, err := prqclient.UpdateStatus(ctx, pr, metav1.UpdateOptions{})
@@ -78,10 +78,10 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 	}
 
 	for _, binding := range pr.Spec.Bindings {
-		prc.logger.V(3).Info("binding pod to node", "bind", binding, "obj", prid)
+		controller.logger.V(3).Info("binding pod to node", "bind", binding, "obj", prid)
 
 		if pod, err := podlister.Get(binding.PodName); err != nil {
-			prc.logger.Error(err, "failed to get pod")
+			controller.logger.Error(err, "failed to get pod")
 			message := fmt.Sprintf("Failed to get pod %s: %v", binding.PodName, err)
 			helpers.SetPodBindingFailure(pr, binding, "API error", message)
 			continue
@@ -107,14 +107,14 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 			},
 		}
 
-		binder := prc.coreclient.Pods(pr.Namespace)
+		binder := controller.coreclient.Pods(pr.Namespace)
 		if err := binder.Bind(ctx, bind, metav1.CreateOptions{}); err != nil {
-			prc.logger.Error(err, "failed to bind pod to node", "bind", binding, "obj", prid)
+			controller.logger.Error(err, "failed to bind pod to node", "bind", binding, "obj", prid)
 			helpers.SetPodBindingFailure(pr, binding, "API denied binding", err.Error())
 			continue
 		}
 
-		prc.logger.V(3).Info("pod successfully bound to node", "bind", binding, "obj", prid)
+		controller.logger.V(3).Info("pod successfully bound to node", "bind", binding, "obj", prid)
 		helpers.SetPodBindingSuccess(pr, binding, "Binding successful", "Pod successfully bound")
 	}
 
@@ -123,14 +123,14 @@ func (prc *PlacementRequestController) ScheduleOne(ctx context.Context, pr *v1al
 		return fmt.Errorf("failed to update placement request status: %w", err)
 	}
 
-	prc.logger.V(3).Info("placement request processed", "obj", prid)
+	controller.logger.V(3).Info("placement request processed", "obj", prid)
 	return nil
 }
 
 // AddEventHandlers is used to make sure the informers are pointing to the
 // right event handlers here. We want to enqueue every new PlacementRequest
 // into our internal queues.
-func (prc *PlacementRequestController) AddEventHandlers(informer informer.PlacementRequestInformer) error {
+func (controller *PlacementRequestController) AddEventHandlers(informer informer.PlacementRequestInformer) error {
 	if _, err := informer.Informer().AddEventHandler(
 		cache.FilteringResourceEventHandler{
 			FilterFunc: func(obj interface{}) bool {
@@ -142,7 +142,7 @@ func (prc *PlacementRequestController) AddEventHandlers(informer informer.Placem
 				}
 			},
 			Handler: cache.ResourceEventHandlerFuncs{
-				AddFunc: prc.enqueue,
+				AddFunc: controller.enqueue,
 			},
 		},
 	); err != nil {
@@ -159,22 +159,22 @@ func (prc *PlacementRequestController) AddEventHandlers(informer informer.Placem
 // enqueued the placement request and there may be more events happening. We
 // do some basic validation here and in case of failure we just try to
 // reject the PlacementRequest.
-func (prc *PlacementRequestController) enqueue(obj interface{}) {
+func (controller *PlacementRequestController) enqueue(obj interface{}) {
 	pr, ok := obj.(*v1alpha1.PlacementRequest)
 	if !ok || pr.Spec.SchedulerName == "" {
 		return
 	}
 
-	qcfg, found := prc.queues[pr.Spec.SchedulerName]
+	qcfg, found := controller.queues[pr.Spec.SchedulerName]
 	if !found {
 		reason, msg := "QueueNotFound", "Scheduler queue not found"
-		prc.TryToRejectPlacementRequest(pr, reason, msg)
+		controller.TryToRejectPlacementRequest(pr, reason, msg)
 		return
 	}
 
 	if len(pr.Spec.Bindings) > int(qcfg.MaxSize) {
 		reason, msg := "PlacementRequestTooLarge", "Placement request too large"
-		prc.TryToRejectPlacementRequest(pr, reason, msg)
+		controller.TryToRejectPlacementRequest(pr, reason, msg)
 		return
 	}
 
@@ -184,14 +184,14 @@ func (prc *PlacementRequestController) enqueue(obj interface{}) {
 // TryToRejectPlacementRequest should be used when rejecting a PlacementRequest
 // without worrying about possible failures when doing so. This function uses a
 // hard coded timeout and does not return (but logs) errors.
-func (prc *PlacementRequestController) TryToRejectPlacementRequest(
+func (controller *PlacementRequestController) TryToRejectPlacementRequest(
 	pr *v1alpha1.PlacementRequest, reason, message string,
 ) {
 	prid := map[string]string{"name": pr.Name, "namespace": pr.Namespace}
-	prc.logger.V(5).Info("trying to reject placement request", "obj", prid)
+	controller.logger.V(5).Info("trying to reject placement request", "obj", prid)
 
 	ctx, cancel := context.WithTimeout(
-		context.Background(), prc.options.tryToRejectTimeout,
+		context.Background(), controller.options.tryToRejectTimeout,
 	)
 	defer cancel()
 
@@ -199,9 +199,9 @@ func (prc *PlacementRequestController) TryToRejectPlacementRequest(
 	pr.Status.Reason = reason
 	pr.Status.Message = message
 
-	prqclient := prc.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
+	prqclient := controller.client.KombinerV1alpha1().PlacementRequests(pr.Namespace)
 	if _, err := prqclient.UpdateStatus(ctx, pr, metav1.UpdateOptions{}); err != nil {
-		prc.logger.Error(err, "failed to reject placement request", "obj", prid)
+		controller.logger.Error(err, "failed to reject placement request", "obj", prid)
 	}
 }
 
