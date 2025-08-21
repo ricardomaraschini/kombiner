@@ -7,7 +7,8 @@ generated concurrently by multiple schedulers, while ensuring fairness,
 preventing starvation, respecting placement policies, and fostering cooperation
 across the scheduling ecosystem.
 
-This project proposes Placement Requests Queuing as a new native coordination
+This project [proposes Placement Requests Queuing](https://docs.google.com/document/d/1t6hBcsdBeA4N22byPIeK_Su54Vwm_nXXZqU-VYKTeWE/edit?usp=sharing)
+as a new native coordination
 mechanism for Kubernetes scheduling, especially when multiple independent
 schedulers are operating simultaneously.
 
