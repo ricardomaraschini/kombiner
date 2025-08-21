@@ -88,6 +88,10 @@ When pods are deleted the corresponding PlacementRequests will be collected by
 the garbage collector and removed. You can also edit the controller configuration
 by editing the `controller-config` configmap in the `kube-system` namespace.
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/734830.svg)](https://asciinema.org/a/734830)
+
 ## Community, discussion, contribution, and support
 
 You can reach the contributors of this project at:
