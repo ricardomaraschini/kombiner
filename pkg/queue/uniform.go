@@ -26,7 +26,7 @@ func (u *UniformReader) Read(_ context.Context) *v1alpha1.PlacementRequest {
 	nrconfigs := len(configs)
 	for range nrconfigs {
 		qidx := u.next(configs)
-		if pr := configs[qidx].Queue.Pop(); pr != nil {
+		if pr := configs[qidx].QueueRef.Pop(); pr != nil {
 			return pr
 		}
 
