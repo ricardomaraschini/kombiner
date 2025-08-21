@@ -1,17 +1,18 @@
 # this should never be used in production and is intended for testing.
+{{- range $i, $scheduler := .Values.schedulers }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: scheduler-config
+  name: {{ $scheduler.name }}
 data:
   config.yaml: |-
     apiVersion: kubescheduler.config.k8s.io/v1
     kind: KubeSchedulerConfiguration
     leaderElection:
-      resourceName: kombiner-scheduler
+      resourceName: {{ $scheduler.name }}
     profiles:
-    - schedulerName: kombiner-scheduler
+    - schedulerName: {{ $scheduler.name }}
       plugins:
         bind:
           enabled:
@@ -22,3 +23,4 @@ data:
       - name: PlacementRequestBinder
         args:
           timeout: 5s
+{{- end }}

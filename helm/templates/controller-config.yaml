@@ -11,11 +11,8 @@ data:
     # supported algorithms: RoundRobin and Uniform
     # fairnessAlgorithm: RoundRobin
     queues:
-    - schedulerName: kombiner-scheduler
-      weight: 50
-      maxSize: 1
-      plugins:
-        validate:
-          enabled:
-          - TaintToleration
-          - PodTopologySpread
+{{- range $i, $scheduler := .Values.schedulers }}
+    - schedulerName: {{ $scheduler.name }}
+      weight: {{ $scheduler.weight }}
+      maxSize: {{ $scheduler.maxSize }}
+{{- end }}

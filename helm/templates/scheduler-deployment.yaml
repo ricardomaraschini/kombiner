@@ -1,20 +1,21 @@
 # this should never be used in production and is intended for testing.
+{{- range $i, $scheduler := .Values.schedulers }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kombiner-daemons
+  name: {{ $scheduler.name }}
   labels:
-    app: kombiner-daemons
+    app: {{ $scheduler.name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kombiner-daemons
+      app: {{ $scheduler.name }}
   template:
     metadata:
       labels:
-        app: kombiner-daemons
+        app: {{ $scheduler.name }}
     spec:
       tolerations:
       - effect: NoSchedule
@@ -23,13 +24,10 @@ spec:
       volumes:
       - name: scheduler-config
         configMap:
-          name: scheduler-config
-      - name: controller-config
-        configMap:
-          name: controller-config
+          name: {{ $scheduler.name }}
       containers:
       - name: scheduler
-        image: {{ .Values.image.image_name }}:{{ .Values.image.tag }}
+        image: {{ $.Values.image.repository }}:{{ $.Values.image.tag }}
         imagePullPolicy: IfNotPresent
         command:
         - /usr/local/bin/kombiner-scheduler
@@ -39,15 +37,4 @@ spec:
         - name: scheduler-config
           mountPath: /etc/scheduler/config.yaml
           subPath: config.yaml
-      - name: controller
-        image: {{ .Values.image.image_name }}:{{ .Values.image.tag }}
-        imagePullPolicy: IfNotPresent
-        command:
-        - /usr/local/bin/kombiner-controller
-        args:
-        - --config=/etc/controller/config.yaml
-        - -v=3
-        volumeMounts:
-        - name: controller-config
-          mountPath: /etc/controller/config.yaml
-          subPath: config.yaml
+{{- end }}
