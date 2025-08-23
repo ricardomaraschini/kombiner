@@ -24,6 +24,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/cert-manager/boilersuite v0.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
@@ -136,6 +137,7 @@ require (
 )
 
 tool (
+	github.com/cert-manager/boilersuite
 	github.com/onsi/ginkgo/v2/ginkgo
 	honnef.co/go/tools/cmd/staticcheck
 	k8s.io/code-generator
