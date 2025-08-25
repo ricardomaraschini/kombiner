@@ -25,12 +25,12 @@ source "${SCRIPT_ROOT}/hack/kube_codegen.sh"
 THIS_PKG="kombiner"
 
 kube::codegen::gen_helpers \
-    --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
+    --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.go.txt" \
     "${SCRIPT_ROOT}/pkg/apis"
 
 kube::codegen::gen_client \
     --with-watch \
-    --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
+    --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.go.txt" \
     --output-dir "${SCRIPT_ROOT}/pkg/generated" \
     --output-pkg "${THIS_PKG}/pkg/generated" \
     "${SCRIPT_ROOT}/pkg/apis"
