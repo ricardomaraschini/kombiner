@@ -3,10 +3,10 @@ kind: PlacementRequest
 metadata:
   name: example-placement-request
 spec:
-  schedulerName: teste
+  schedulerName: custom-scheduler
   policy: Lenient
   priority: 10
   bindings:
   - podName: pod-name
     podUID: pod-uid
-    nodeName: node-name
+    nodeName: master1

@@ -1,9 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-using-custom-scheduler
+  name: pod-name
 spec:
-  schedulerName: kombiner-scheduler
+  schedulerName: custom-scheduler
   containers:
   - name: nginx
     image: nginx:1.25
+  tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
